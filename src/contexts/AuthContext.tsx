@@ -151,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
+        console.error('Sign in error:', error);
         toast({
           title: "Login Failed",
           description: error.message,
@@ -244,6 +245,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyOTP = async (mobileNumber: string, otp: string, name?: string) => {
     try {
+      console.log('Verifying OTP for:', mobileNumber, 'with OTP:', otp);
+      
       // Verify OTP
       const { data: otpVerification, error: verifyError } = await supabase
         .from('otp_verifications')
@@ -257,6 +260,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (verifyError || !otpVerification) {
+        console.error('OTP verification failed:', verifyError);
         toast({
           title: "Invalid OTP",
           description: "Please check your OTP and try again.",
@@ -271,11 +275,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .update({ verified: true })
         .eq('id', otpVerification.id);
 
-      // Create or sign in user with mobile number as email equivalent
-      const email = `${mobileNumber.replace(/[^0-9]/g, '')}@mobile.local`;
-      const password = `mobile_${mobileNumber}_${Date.now()}`;
+      // Create user account with proper email format
+      const cleanNumber = mobileNumber.replace(/[^0-9]/g, '');
+      const email = `${cleanNumber}@mobile.ather.local`;
+      const password = `mobile_${cleanNumber}_auth`;
 
-      const { error: signUpError } = await supabase.auth.signUp({
+      console.log('Creating user with email:', email);
+
+      // Try to sign up the user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -287,6 +295,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (signUpError && !signUpError.message.includes('already registered')) {
+        console.error('Sign up error:', signUpError);
         throw signUpError;
       }
 
@@ -297,6 +306,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (signInError) {
+        console.error('Sign in error:', signInError);
         throw signInError;
       }
 
@@ -308,6 +318,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { error: null };
     } catch (error) {
       console.error('Verify OTP error:', error);
+      toast({
+        title: "Login Failed",
+        description: "Please try again or contact support.",
+        variant: "destructive",
+      });
       return { error };
     }
   };
