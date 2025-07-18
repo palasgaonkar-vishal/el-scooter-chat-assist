@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { db } from '@/lib/database';
 import { useSearchFAQs } from '@/hooks/useFAQ';
+import { useCreateEscalation } from '@/hooks/useEscalation';
 import { toast } from 'sonner';
 import type { ChatConversation } from '@/lib/database';
 
@@ -17,6 +18,7 @@ export interface ChatMessage {
   confidenceScore?: number;
   isHelpful?: boolean;
   canRate?: boolean;
+  isEscalated?: boolean;
 }
 
 export interface FileUpload {
@@ -99,6 +101,7 @@ export const useChat = () => {
           confidenceScore: conv.confidence_score || undefined,
           isHelpful: conv.is_helpful || undefined,
           canRate: conv.response !== null && conv.is_helpful === null,
+          isEscalated: conv.escalated || false,
         };
 
         return [userMessage, botMessage];
@@ -212,6 +215,7 @@ export const useSendMessage = () => {
 
 export const useProcessAIResponse = () => {
   const queryClient = useQueryClient();
+  const createEscalation = useCreateEscalation();
 
   return useMutation({
     mutationFn: async ({ conversationId, query }: { conversationId: string; query: string }) => {
@@ -327,6 +331,20 @@ export const useProcessAIResponse = () => {
 
       if (error) throw error;
 
+      // Create escalation if needed
+      if (shouldEscalate) {
+        try {
+          await createEscalation.mutateAsync({
+            query,
+            conversationId,
+            priority: confidenceScore < 0.3 ? 'high' : 'medium',
+          });
+        } catch (escalationError) {
+          console.error('Failed to create escalation:', escalationError);
+          // Don't fail the whole process if escalation fails
+        }
+      }
+
       // Track analytics
       await db.analytics.trackEvent('chat_response_generated', {
         conversation_id: conversationId,
@@ -349,6 +367,7 @@ export const useProcessAIResponse = () => {
 
 export const useRateResponse = () => {
   const queryClient = useQueryClient();
+  const createEscalation = useCreateEscalation();
   
   return useMutation({
     mutationFn: async ({ conversationId, isHelpful }: { conversationId: string; isHelpful: boolean }) => {
@@ -364,6 +383,19 @@ export const useRateResponse = () => {
         .single();
 
       if (error) throw error;
+
+      // Create escalation for negative feedback
+      if (!isHelpful) {
+        try {
+          await createEscalation.mutateAsync({
+            query: data.query,
+            conversationId,
+            priority: 'medium',
+          });
+        } catch (escalationError) {
+          console.error('Failed to create escalation for negative feedback:', escalationError);
+        }
+      }
 
       // Update FAQ helpful/not helpful counts if FAQ was matched
       if (data.faq_matched_id) {
@@ -387,6 +419,7 @@ export const useRateResponse = () => {
         conversation_id: conversationId,
         is_helpful: isHelpful,
         faq_matched_id: data.faq_matched_id,
+        escalated: !isHelpful,
       });
 
       return data;
@@ -398,6 +431,48 @@ export const useRateResponse = () => {
     onError: (error) => {
       console.error('Rating error:', error);
       toast.error('Failed to submit rating');
+    },
+  });
+};
+
+// Manual escalation hook
+export const useManualEscalation = () => {
+  const createEscalation = useCreateEscalation();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ conversationId, query, priority = 'medium' }: { 
+      conversationId: string; 
+      query: string; 
+      priority?: 'low' | 'medium' | 'high' | 'critical' 
+    }) => {
+      // Update conversation to mark as escalated
+      const { error: updateError } = await supabase
+        .from('chat_conversations')
+        .update({
+          escalated: true,
+          escalated_at: new Date().toISOString(),
+        })
+        .eq('id', conversationId);
+
+      if (updateError) throw updateError;
+
+      // Create escalation
+      await createEscalation.mutateAsync({
+        query,
+        conversationId,
+        priority,
+      });
+
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      toast.success('Query escalated to support team');
+    },
+    onError: (error) => {
+      console.error('Manual escalation error:', error);
+      toast.error('Failed to escalate query');
     },
   });
 };

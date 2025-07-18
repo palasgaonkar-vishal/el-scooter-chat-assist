@@ -267,6 +267,105 @@ export const db = {
     }
   },
 
+  // Escalation operations
+  escalations: {
+    async createEscalatedQuery(query: string, conversationId?: string, priority: EscalationPriority = 'medium'): Promise<EscalatedQuery | null> {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('escalated_queries')
+        .insert({
+          user_id: user?.id || null,
+          conversation_id: conversationId,
+          query,
+          priority,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating escalated query:', error);
+        return null;
+      }
+      return data;
+    },
+
+    async getEscalatedQueries(status?: EscalationStatus): Promise<EscalatedQuery[]> {
+      let query = supabase
+        .from('escalated_queries')
+        .select(`
+          *,
+          profiles!escalated_queries_user_id_fkey (
+            name,
+            email,
+            mobile_number
+          ),
+          chat_conversations (
+            query,
+            response,
+            file_urls,
+            created_at
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching escalated queries:', error);
+        return [];
+      }
+      return data || [];
+    },
+
+    async updateEscalatedQuery(id: string, updates: Partial<EscalatedQuery>): Promise<EscalatedQuery | null> {
+      const { data, error } = await supabase
+        .from('escalated_queries')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating escalated query:', error);
+        return null;
+      }
+      return data;
+    },
+
+    async resolveEscalatedQuery(id: string, resolution: string, adminNotes?: string): Promise<EscalatedQuery | null> {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const { data, error } = await supabase
+        .from('escalated_queries')
+        .update({
+          resolution,
+          admin_notes: adminNotes,
+          status: 'resolved' as EscalationStatus,
+          resolved_at: new Date().toISOString(),
+          assigned_admin_id: user?.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error resolving escalated query:', error);
+        return null;
+      }
+      return data;
+    }
+  },
+
   // Order operations
   orders: {
     async getUserOrders(): Promise<Order[]> {

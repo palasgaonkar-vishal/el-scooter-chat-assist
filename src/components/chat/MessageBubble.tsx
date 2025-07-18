@@ -1,107 +1,70 @@
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Bot, User, ThumbsUp, ThumbsDown, FileText, Image, ExternalLink } from 'lucide-react';
-import { useRateResponse } from '@/hooks/useChat';
-import type { ChatMessage } from '@/hooks/useChat';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Bot, User, ThumbsUp, ThumbsDown, FileText, AlertTriangle } from "lucide-react";
+import { ChatMessage } from "@/hooks/useChat";
+import { useRateResponse } from "@/hooks/useChat";
+import { EscalationButton } from "./EscalationButton";
 
 interface MessageBubbleProps {
   message: ChatMessage;
 }
 
 export const MessageBubble = ({ message }: MessageBubbleProps) => {
-  const [hasRated, setHasRated] = useState(message.isHelpful !== undefined);
   const rateResponse = useRateResponse();
 
-  const handleRating = async (isHelpful: boolean) => {
-    if (hasRated) return;
-    
-    try {
-      await rateResponse.mutateAsync({
-        conversationId: message.id.split('-')[0], // Extract conversation ID
-        isHelpful,
-      });
-      setHasRated(true);
-    } catch (error) {
-      console.error('Failed to rate response:', error);
-    }
+  const handleRate = async (isHelpful: boolean) => {
+    const conversationId = message.id.replace('-bot', '').replace('-user', '');
+    await rateResponse.mutateAsync({ conversationId, isHelpful });
   };
 
-  const getFileIcon = (url: string) => {
-    const extension = url.split('.').pop()?.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) {
-      return <Image className="h-4 w-4" />;
-    }
-    return <FileText className="h-4 w-4" />;
-  };
-
-  const formatFileName = (url: string) => {
-    return url.split('/').pop()?.split('-').slice(1).join('-') || 'file';
-  };
+  const conversationId = message.id.replace('-bot', '').replace('-user', '');
 
   return (
     <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`max-w-[85%] sm:max-w-[70%] ${message.sender === 'user' ? 'order-1' : 'order-2'}`}>
-        <Card className={`${
-          message.sender === 'user'
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted'
-        }`}>
-          <CardContent className="p-4">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                {message.sender === 'bot' ? (
-                  <Bot className="h-5 w-5 mt-0.5" />
-                ) : (
-                  <User className="h-5 w-5 mt-0.5" />
-                )}
-              </div>
+      <Card className={`max-w-[85%] sm:max-w-[70%] ${
+        message.sender === 'user' 
+          ? 'bg-primary text-primary-foreground' 
+          : 'bg-muted'
+      }`}>
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            {message.sender === 'bot' && (
+              <Bot className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            )}
+            {message.sender === 'user' && (
+              <User className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            )}
+            
+            <div className="flex-1 min-w-0">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {message.content}
+              </p>
               
-              <div className="flex-1 space-y-3">
-                {/* Message Content */}
-                <div>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                  <p className="text-xs opacity-70 mt-2">
-                    {message.timestamp.toLocaleTimeString()}
-                  </p>
+              {/* File attachments */}
+              {message.files && message.files.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {message.files.map((file) => (
+                    <a
+                      key={file.id}
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-xs bg-background/10 rounded px-2 py-1 hover:bg-background/20 transition-colors"
+                    >
+                      <FileText className="h-3 w-3" />
+                      <span>{file.name}</span>
+                    </a>
+                  ))}
                 </div>
+              )}
 
-                {/* File Attachments */}
-                {message.files && message.files.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium opacity-80">Attachments:</p>
-                    <div className="grid gap-2">
-                      {message.files.map((file) => (
-                        <Card key={file.id} className="bg-background/10 border-background/20">
-                          <CardContent className="p-2">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2 flex-1 min-w-0">
-                                {getFileIcon(file.url)}
-                                <span className="text-xs truncate">
-                                  {formatFileName(file.url)}
-                                </span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => window.open(file.url, '_blank')}
-                              >
-                                <ExternalLink className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Bot Message Metadata */}
-                {message.sender === 'bot' && (
-                  <div className="flex flex-wrap gap-2 items-center">
+              {/* Bot message metadata */}
+              {message.sender === 'bot' && (
+                <div className="mt-3 space-y-2">
+                  {/* Confidence and FAQ match indicators */}
+                  <div className="flex items-center space-x-2 text-xs">
                     {message.faqMatched && (
                       <Badge variant="secondary" className="text-xs">
                         FAQ Match
@@ -109,47 +72,84 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
                     )}
                     {message.confidenceScore !== undefined && (
                       <Badge variant="outline" className="text-xs">
-                        Confidence: {Math.round(message.confidenceScore * 100)}%
+                        {Math.round(message.confidenceScore * 100)}% confidence
+                      </Badge>
+                    )}
+                    {message.isEscalated && (
+                      <Badge className="text-xs bg-orange-100 text-orange-800">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        Escalated
                       </Badge>
                     )}
                   </div>
-                )}
 
-                {/* Rating Buttons */}
-                {message.sender === 'bot' && message.canRate && (
-                  <div className="flex items-center space-x-2 pt-2">
-                    <p className="text-xs opacity-70">Was this helpful?</p>
-                    <div className="flex space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-7 w-7 p-0 ${
-                          message.isHelpful === true ? 'bg-green-100 text-green-600' : ''
-                        }`}
-                        onClick={() => handleRating(true)}
-                        disabled={hasRated || rateResponse.isPending}
-                      >
-                        <ThumbsUp className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-7 w-7 p-0 ${
-                          message.isHelpful === false ? 'bg-red-100 text-red-600' : ''
-                        }`}
-                        onClick={() => handleRating(false)}
-                        disabled={hasRated || rateResponse.isPending}
-                      >
-                        <ThumbsDown className="h-3 w-3" />
-                      </Button>
+                  {/* Rating buttons */}
+                  {message.canRate && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-muted-foreground">Was this helpful?</span>
+                      <div className="flex space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRate(true)}
+                          disabled={rateResponse.isPending}
+                          className="h-6 px-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <ThumbsUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRate(false)}
+                          disabled={rateResponse.isPending}
+                          className="h-6 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <ThumbsDown className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+
+                  {/* Manual escalation button */}
+                  {message.sender === 'bot' && !message.isEscalated && message.isHelpful !== true && (
+                    <div className="mt-2">
+                      <EscalationButton
+                        conversationId={conversationId}
+                        query={message.content}
+                        disabled={rateResponse.isPending}
+                      />
+                    </div>
+                  )}
+
+                  {/* Helpfulness feedback */}
+                  {message.isHelpful !== undefined && (
+                    <div className={`text-xs flex items-center space-x-1 ${
+                      message.isHelpful ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {message.isHelpful ? (
+                        <>
+                          <ThumbsUp className="h-3 w-3" />
+                          <span>Marked as helpful</span>
+                        </>
+                      ) : (
+                        <>
+                          <ThumbsDown className="h-3 w-3" />
+                          <span>Marked as not helpful</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Timestamp */}
+              <p className="text-xs opacity-70 mt-2">
+                {message.timestamp.toLocaleTimeString()}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
