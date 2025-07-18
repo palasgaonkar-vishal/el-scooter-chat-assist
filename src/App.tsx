@@ -2,7 +2,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { Toaster } from "@/components/ui/toaster";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -40,97 +39,89 @@ const queryClient = new QueryClient({
   },
 });
 
-// Session timeout wrapper component
-const SessionTimeoutWrapper = ({ children }: { children: React.ReactNode }) => {
-  useSessionTimeout();
-  return <>{children}</>;
-};
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SessionTimeoutWrapper>
-          <Router>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<CustomerLogin />} />
-              <Route path="/register" element={<CustomerRegister />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<CustomerLogin />} />
+            <Route path="/register" element={<CustomerRegister />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
-              {/* Customer Protected Routes */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <CustomerLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Dashboard />} />
-              </Route>
-              
-              <Route path="/chat" element={
-                <ProtectedRoute>
-                  <CustomerLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Chat />} />
-              </Route>
-              
-              <Route path="/order-status" element={
-                <ProtectedRoute>
-                  <CustomerLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<OrderStatus />} />
-              </Route>
-              
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <CustomerLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Profile />} />
-              </Route>
+            {/* Customer Protected Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <CustomerLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+            </Route>
+            
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <CustomerLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Chat />} />
+            </Route>
+            
+            <Route path="/order-status" element={
+              <ProtectedRoute>
+                <CustomerLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<OrderStatus />} />
+            </Route>
+            
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <CustomerLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Profile />} />
+            </Route>
 
-              {/* Admin Protected Routes */}
-              <Route path="/admin/dashboard" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<AdminDashboard />} />
-              </Route>
-              
-              <Route path="/admin/faq" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<FAQManagement />} />
-              </Route>
-              
-              <Route path="/admin/queries" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<EscalatedQueries />} />
-              </Route>
-              
-              <Route path="/admin/analytics" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Analytics />} />
-              </Route>
+            {/* Admin Protected Routes */}
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<AdminDashboard />} />
+            </Route>
+            
+            <Route path="/admin/faq" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<FAQManagement />} />
+            </Route>
+            
+            <Route path="/admin/queries" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<EscalatedQueries />} />
+            </Route>
+            
+            <Route path="/admin/analytics" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Analytics />} />
+            </Route>
 
-              {/* Catch all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </Router>
-        </SessionTimeoutWrapper>
+            {/* Catch all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </Router>
       </AuthProvider>
     </QueryClientProvider>
   );
