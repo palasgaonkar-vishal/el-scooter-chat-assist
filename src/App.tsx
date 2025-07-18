@@ -1,13 +1,14 @@
+
 import {
   BrowserRouter as Router,
   Routes,
   Route,
 } from "react-router-dom";
 import { Toaster } from "sonner";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 import Index from "@/pages/Index";
 import CustomerLogin from "@/pages/auth/CustomerLogin";
@@ -23,30 +24,32 @@ import Chat from "@/pages/customer/Chat";
 import OrderStatus from "@/pages/customer/OrderStatus";
 
 import AdminLayout from "@/components/layout/AdminLayout";
-import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
 import EscalatedQueries from "@/pages/admin/EscalatedQueries";
 import FAQManagement from "@/pages/admin/FAQManagement";
 import Analytics from "@/pages/admin/Analytics";
 import OrderManagement from "@/pages/admin/OrderManagement";
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <QueryClient>
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
           <Toaster />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />
-            <Route path="/auth/customer-login" element={<CustomerLogin />} />
-            <Route path="/auth/customer-register" element={<CustomerRegister />} />
-            <Route path="/auth/admin-login" element={<AdminLogin />} />
+            <Route path="/login" element={<CustomerLogin />} />
+            <Route path="/register" element={<CustomerRegister />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* Customer routes */}
             <Route
-              path="/customer"
+              path="/dashboard"
               element={
-                <ProtectedRoute requiredRole="customer">
+                <ProtectedRoute>
                   <CustomerLayout />
                 </ProtectedRoute>
               }
@@ -62,7 +65,7 @@ function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute adminOnly={true}>
                   <AdminLayout />
                 </ProtectedRoute>
               }
@@ -79,7 +82,7 @@ function App() {
           </Routes>
         </Router>
       </AuthProvider>
-    </QueryClient>
+    </QueryClientProvider>
   );
 }
 
