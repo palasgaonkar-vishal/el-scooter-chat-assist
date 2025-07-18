@@ -212,12 +212,82 @@ export const useSendMessage = () => {
 
 export const useProcessAIResponse = () => {
   const queryClient = useQueryClient();
-  const { data: searchResults, refetch: searchFAQs } = useSearchFAQs('', '');
 
   return useMutation({
     mutationFn: async ({ conversationId, query }: { conversationId: string; query: string }) => {
-      // Search for matching FAQs
-      const { data: faqResults } = await searchFAQs();
+      // Get user profile to get scooter models
+      const profile = await db.profiles.getCurrentProfile();
+      const userScooterModels = profile?.scooter_models || [];
+
+      // Search for matching FAQs using the corrected hook
+      const { data: faqResults } = await queryClient.fetchQuery({
+        queryKey: ['faqs-search', query, userScooterModels],
+        queryFn: async () => {
+          if (!query.trim()) return [];
+
+          console.log('Searching FAQs with query:', query);
+
+          // Get all active FAQs
+          const { data: faqs, error } = await supabase
+            .from('faqs')
+            .select('*')
+            .eq('is_active', true);
+
+          if (error) {
+            console.error('FAQ search error:', error);
+            throw error;
+          }
+
+          if (!faqs || faqs.length === 0) {
+            return [];
+          }
+
+          // Calculate similarity for each FAQ using the database function
+          const resultsWithSimilarity = await Promise.all(
+            faqs.map(async (faq) => {
+              const { data: similarity, error: simError } = await supabase
+                .rpc('calculate_text_similarity', {
+                  query_text: query,
+                  faq_question: faq.question,
+                  faq_answer: faq.answer
+                });
+
+              if (simError) {
+                console.error('Similarity calculation error:', simError);
+                return { ...faq, similarity_score: 0 };
+              }
+
+              return { ...faq, similarity_score: similarity || 0 };
+            })
+          );
+
+          // Get confidence threshold
+          const threshold = 0.7; // Default threshold
+          let filteredResults = resultsWithSimilarity.filter(
+            (faq) => (faq.similarity_score || 0) >= threshold
+          );
+
+          // Prioritize FAQs that match user's scooter models
+          if (userScooterModels && userScooterModels.length > 0) {
+            filteredResults = filteredResults.sort((a, b) => {
+              const aHasUserModel = a.scooter_models?.some(model => userScooterModels.includes(model));
+              const bHasUserModel = b.scooter_models?.some(model => userScooterModels.includes(model));
+              
+              if (aHasUserModel && !bHasUserModel) return -1;
+              if (!aHasUserModel && bHasUserModel) return 1;
+              
+              // If both or neither have user models, sort by similarity score
+              return (b.similarity_score || 0) - (a.similarity_score || 0);
+            });
+          } else {
+            // Sort by similarity score
+            filteredResults.sort((a, b) => (b.similarity_score || 0) - (a.similarity_score || 0));
+          }
+
+          console.log(`Found ${filteredResults.length} FAQs above ${threshold} confidence threshold`);
+          return filteredResults;
+        },
+      });
       
       let response = "I'm sorry, I couldn't find a specific answer to your question. Our team will review this and get back to you.";
       let faqMatchedId: string | undefined;
@@ -226,18 +296,18 @@ export const useProcessAIResponse = () => {
 
       if (faqResults && faqResults.length > 0) {
         const bestMatch = faqResults[0];
-        confidenceScore = bestMatch.similarity;
+        confidenceScore = bestMatch.similarity_score || 0;
         
         // Get confidence threshold from system settings
         const threshold = await db.settings.getConfidenceThreshold();
         
         if (confidenceScore >= threshold) {
-          response = bestMatch.faq.answer;
-          faqMatchedId = bestMatch.faq.id;
+          response = bestMatch.answer;
+          faqMatchedId = bestMatch.id;
           shouldEscalate = false;
           
           // Increment FAQ view count
-          await db.faqs.incrementViewCount(bestMatch.faq.id);
+          await db.faqs.incrementViewCount(bestMatch.id);
         }
       }
 
