@@ -280,14 +280,46 @@ export type Database = {
           },
         ]
       }
+      otp_verifications: {
+        Row: {
+          attempts: number | null
+          created_at: string
+          expires_at: string
+          id: string
+          mobile_number: string
+          otp_code: string
+          verified: boolean | null
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          mobile_number: string
+          otp_code: string
+          verified?: boolean | null
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          mobile_number?: string
+          otp_code?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
           created_at: string | null
           email: string | null
           id: string
+          last_login: string | null
           mobile_number: string | null
           mobile_number_encrypted: string | null
+          mobile_verified: boolean | null
           name: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           scooter_models: Database["public"]["Enums"]["scooter_model"][] | null
@@ -298,8 +330,10 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id: string
+          last_login?: string | null
           mobile_number?: string | null
           mobile_number_encrypted?: string | null
+          mobile_verified?: boolean | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           scooter_models?: Database["public"]["Enums"]["scooter_model"][] | null
@@ -310,8 +344,10 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          last_login?: string | null
           mobile_number?: string | null
           mobile_number_encrypted?: string | null
+          mobile_verified?: boolean | null
           name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           scooter_models?: Database["public"]["Enums"]["scooter_model"][] | null
@@ -369,6 +405,18 @@ export type Database = {
       cleanup_expired_chats: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      cleanup_expired_otps: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      encrypt_mobile_number: {
+        Args: { mobile_number: string }
+        Returns: string
+      }
+      generate_otp: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       gtrgm_compress: {
         Args: { "": unknown }

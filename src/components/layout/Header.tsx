@@ -1,9 +1,11 @@
 
 import { useState } from "react";
-import { Menu, X, User, Settings } from "lucide-react";
+import { Menu, X, User, Settings, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   isAdmin?: boolean;
@@ -12,6 +14,7 @@ interface HeaderProps {
 const Header = ({ isAdmin = false }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut, isAdmin: userIsAdmin } = useAuth();
 
   const customerNavItems = [
     { name: "Dashboard", path: "/dashboard" },
@@ -30,6 +33,10 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
   const navItems = isAdmin ? adminNavItems : customerNavItems;
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -61,10 +68,44 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
 
         {/* User Menu */}
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="hidden md:flex">
-            <User className="h-4 w-4 mr-2" />
-            Profile
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="hidden md:flex">
+                  <User className="h-4 w-4 mr-2" />
+                  {user.user_metadata?.name || user.email?.split('@')[0] || 'User'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="flex items-center">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                {userIsAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin/dashboard" className="flex items-center">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Admin Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center text-destructive">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" size="sm" asChild className="hidden md:flex">
+              <Link to="/login">
+                <User className="h-4 w-4 mr-2" />
+                Sign In
+              </Link>
+            </Button>
+          )}
           
           {/* Mobile Navigation */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -103,14 +144,39 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
                       {item.name}
                     </Link>
                   ))}
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center text-foreground/60 hover:text-foreground/80 transition-colors mt-4 pt-4 border-t"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Link>
+                  
+                  {user ? (
+                    <>
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center text-foreground/60 hover:text-foreground/80 transition-colors mt-4 pt-4 border-t"
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Profile
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          handleSignOut();
+                          setIsOpen(false);
+                        }}
+                        className="flex items-center justify-start text-destructive hover:text-destructive p-0 h-auto"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <Link
+                      to="/login"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center text-foreground/60 hover:text-foreground/80 transition-colors mt-4 pt-4 border-t"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Link>
+                  )}
                 </nav>
               </div>
             </SheetContent>
