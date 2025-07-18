@@ -223,30 +223,29 @@ export const useRateFAQ = () => {
 export const useIncrementFAQView = () => {
   return useMutation({
     mutationFn: async (faqId: string) => {
+      // Get the current view count
+      const { data: currentFAQ, error: fetchError } = await supabase
+        .from('faqs')
+        .select('view_count')
+        .eq('id', faqId)
+        .single();
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      // Update with incremented value
       const { data, error } = await supabase
-        .rpc('increment', { 
-          table_name: 'faqs',
-          row_id: faqId,
-          column_name: 'view_count'
-        });
+        .from('faqs')
+        .update({ 
+          view_count: (currentFAQ.view_count || 0) + 1
+        })
+        .eq('id', faqId)
+        .select()
+        .single();
 
       if (error) {
-        // If the RPC doesn't exist, fall back to manual increment
-        const { data: currentFAQ, error: fetchError } = await supabase
-          .from('faqs')
-          .select('view_count')
-          .eq('id', faqId)
-          .single();
-
-        if (fetchError) throw fetchError;
-
-        const { data: updateData, error: updateError } = await supabase
-          .from('faqs')
-          .update({ view_count: (currentFAQ.view_count || 0) + 1 })
-          .eq('id', faqId);
-
-        if (updateError) throw updateError;
-        return updateData;
+        throw error;
       }
 
       return data;
