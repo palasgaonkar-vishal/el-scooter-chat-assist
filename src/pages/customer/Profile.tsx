@@ -1,139 +1,135 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ProfileForm } from '@/components/profile/ProfileForm';
+import { useProfile, useUpdateProfile, useCreateProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/contexts/AuthContext';
+import { AlertCircle, User, Settings } from 'lucide-react';
 
 const Profile = () => {
-  const [profileData, setProfileData] = useState({
-    name: "John Doe",
-    phone: "+91 98765 43210",
-    email: "john.doe@example.com",
-    city: "Bangalore",
-    scooterModel: "450X Gen 3",
-    purchaseDate: "2024-03-15",
-  });
+  const { user } = useAuth();
+  const { data: profile, isLoading, error, refetch } = useProfile();
+  const updateProfileMutation = useUpdateProfile();
+  const createProfileMutation = useCreateProfile();
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement profile update in Task 004
-    console.log("Saving profile:", profileData);
+  console.log('Profile page - User:', user?.id, 'Profile data:', profile, 'Loading:', isLoading, 'Error:', error);
+
+  const handleProfileSubmit = async (formData: any) => {
+    console.log('Profile form submitted:', formData);
+    
+    if (profile) {
+      // Update existing profile
+      await updateProfileMutation.mutateAsync(formData);
+    } else {
+      // Create new profile
+      await createProfileMutation.mutateAsync(formData);
+    }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-64" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Profile page error:', error);
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load profile. Please try again.
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                className="ml-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your account information and preferences
-        </p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Page Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Profile Management</h1>
+          <p className="text-muted-foreground">
+            Manage your personal information and scooter preferences
+          </p>
+        </div>
+
+        {/* Profile Form */}
+        <ProfileForm
+          profile={profile || undefined}
+          onSubmit={handleProfileSubmit}
+          isLoading={updateProfileMutation.isPending || createProfileMutation.isPending}
+        />
+
+        {/* Profile Status Card */}
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Settings className="h-5 w-5" />
+              <CardTitle className="text-lg">Account Status</CardTitle>
+            </div>
+            <CardDescription>
+              Your account verification and profile status
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <span className="font-medium">Mobile Number</span>
+              <span className="text-sm">
+                {profile?.mobile_verified ? '✅ Verified' : '⚠️ Not Verified'}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <span className="font-medium">Profile Completion</span>
+              <span className="text-sm">
+                {profile?.name && profile?.scooter_models?.length ? '✅ Complete' : '⚠️ Incomplete'}
+              </span>
+            </div>
+
+            {(!profile?.name || !profile?.scooter_models?.length) && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Complete your profile to get personalized support and recommendations.
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>
-            Update your personal details and contact information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSave} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  value={profileData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  value={profileData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  disabled
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address (Optional)</Label>
-              <Input
-                id="email"
-                type="email"
-                value={profileData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Select value={profileData.city} onValueChange={(value) => handleInputChange("city", value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Bangalore">Bangalore</SelectItem>
-                  <SelectItem value="Chennai">Chennai</SelectItem>
-                  <SelectItem value="Hyderabad">Hyderabad</SelectItem>
-                  <SelectItem value="Mumbai">Mumbai</SelectItem>
-                  <SelectItem value="Delhi">Delhi</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Scooter Information</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="scooterModel">Scooter Model</Label>
-                  <Select value={profileData.scooterModel} onValueChange={(value) => handleInputChange("scooterModel", value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="450X Gen 3">450X Gen 3</SelectItem>
-                      <SelectItem value="450X Gen 2">450X Gen 2</SelectItem>
-                      <SelectItem value="450 Plus">450 Plus</SelectItem>
-                      <SelectItem value="Rizta">Rizta</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="purchaseDate">Purchase Date</Label>
-                  <Input
-                    id="purchaseDate"
-                    type="date"
-                    value={profileData.purchaseDate}
-                    onChange={(e) => handleInputChange("purchaseDate", e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
     </div>
   );
 };
