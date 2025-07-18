@@ -1,138 +1,85 @@
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+} from "react-router-dom";
+import { Toaster } from "sonner";
+import { QueryClient } from "@tanstack/react-query";
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster } from "@/components/ui/toaster";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
-// Pages
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import Index from "@/pages/Index";
+import CustomerLogin from "@/pages/auth/CustomerLogin";
+import CustomerRegister from "@/pages/auth/CustomerRegister";
+import AdminLogin from "@/pages/auth/AdminLogin";
+import NotFound from "@/pages/NotFound";
 
-// Customer Pages
-import CustomerLogin from "./pages/auth/CustomerLogin";
-import CustomerRegister from "./pages/auth/CustomerRegister";
-import Dashboard from "./pages/customer/Dashboard";
-import Chat from "./pages/customer/Chat";
-import FAQ from "./pages/customer/FAQ";
-import OrderStatus from "./pages/customer/OrderStatus";
-import Profile from "./pages/customer/Profile";
+import CustomerLayout from "@/components/layout/CustomerLayout";
+import Dashboard from "@/pages/customer/Dashboard";
+import Profile from "@/pages/customer/Profile";
+import FAQ from "@/pages/customer/FAQ";
+import Chat from "@/pages/customer/Chat";
+import OrderStatus from "@/pages/customer/OrderStatus";
 
-// Admin Pages
-import AdminLogin from "./pages/auth/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import FAQManagement from "./pages/admin/FAQManagement";
-import EscalatedQueries from "./pages/admin/EscalatedQueries";
-import Analytics from "./pages/admin/Analytics";
-
-// Layouts
-import CustomerLayout from "./components/layout/CustomerLayout";
-import AdminLayout from "./components/layout/AdminLayout";
-
-import "./App.css";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-    },
-  },
-});
+import AdminLayout from "@/components/layout/AdminLayout";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import EscalatedQueries from "@/pages/admin/EscalatedQueries";
+import FAQManagement from "@/pages/admin/FAQManagement";
+import Analytics from "@/pages/admin/Analytics";
+import OrderManagement from "@/pages/admin/OrderManagement";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClient>
       <AuthProvider>
         <Router>
+          <Toaster />
           <Routes>
-            {/* Public Routes */}
+            {/* Public routes */}
             <Route path="/" element={<Index />} />
-            <Route path="/login" element={<CustomerLogin />} />
-            <Route path="/register" element={<CustomerRegister />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/auth/customer-login" element={<CustomerLogin />} />
+            <Route path="/auth/customer-register" element={<CustomerRegister />} />
+            <Route path="/auth/admin-login" element={<AdminLogin />} />
 
-            {/* Customer Protected Routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <CustomerLayout />
-              </ProtectedRoute>
-            }>
+            {/* Customer routes */}
+            <Route
+              path="/customer"
+              element={
+                <ProtectedRoute requiredRole="customer">
+                  <CustomerLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route index element={<Dashboard />} />
-            </Route>
-            
-            <Route path="/chat" element={
-              <ProtectedRoute>
-                <CustomerLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Chat />} />
-            </Route>
-            
-            <Route path="/faq" element={
-              <ProtectedRoute>
-                <CustomerLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<FAQ />} />
-            </Route>
-            
-            <Route path="/order-status" element={
-              <ProtectedRoute>
-                <CustomerLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<OrderStatus />} />
-            </Route>
-            
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <CustomerLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Profile />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="faq" element={<FAQ />} />
+              <Route path="chat" element={<Chat />} />
+              <Route path="orders" element={<OrderStatus />} />
             </Route>
 
-            {/* Admin Protected Routes */}
-            <Route path="/admin/dashboard" element={
-              <ProtectedRoute adminOnly={true}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
+            {/* Admin routes */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route index element={<AdminDashboard />} />
-            </Route>
-            
-            <Route path="/admin/faq" element={
-              <ProtectedRoute adminOnly={true}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<FAQManagement />} />
-            </Route>
-            
-            <Route path="/admin/queries" element={
-              <ProtectedRoute adminOnly={true}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<EscalatedQueries />} />
-            </Route>
-            
-            <Route path="/admin/analytics" element={
-              <ProtectedRoute adminOnly={true}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Analytics />} />
+              <Route path="escalated-queries" element={<EscalatedQueries />} />
+              <Route path="orders" element={<OrderManagement />} />
+              <Route path="faq" element={<FAQManagement />} />
+              <Route path="analytics" element={<Analytics />} />
             </Route>
 
-            {/* Catch all route */}
+            {/* 404 route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <Toaster />
         </Router>
       </AuthProvider>
-    </QueryClientProvider>
+    </QueryClient>
   );
 }
 

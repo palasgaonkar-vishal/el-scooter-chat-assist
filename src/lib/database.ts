@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -393,10 +392,81 @@ export const db = {
         .single();
 
       if (error) {
+        if (error.code === 'PGRST116') return null; // No data found
         console.error('Error fetching order:', error);
         return null;
       }
       return data;
+    },
+
+    async getOrdersByMobile(mobileNumber: string): Promise<Order[]> {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('customer_mobile', mobileNumber)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching orders by mobile:', error);
+        return [];
+      }
+      return data || [];
+    },
+
+    async getAllOrders(status?: OrderStatus): Promise<Order[]> {
+      let query = supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching all orders:', error);
+        return [];
+      }
+      return data || [];
+    },
+
+    async updateOrderStatus(orderId: string, status: OrderStatus, deliveryDate?: string): Promise<Order | null> {
+      const updates: Partial<Order> = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (deliveryDate) {
+        updates.delivery_date = deliveryDate;
+      }
+
+      const { data, error } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating order status:', error);
+        return null;
+      }
+      return data;
+    },
+
+    async createBulkOrders(orders: any[]): Promise<Order[]> {
+      const { data, error } = await supabase
+        .from('orders')
+        .insert(orders)
+        .select();
+
+      if (error) {
+        console.error('Error creating bulk orders:', error);
+        throw error;
+      }
+      return data || [];
     }
   },
 
