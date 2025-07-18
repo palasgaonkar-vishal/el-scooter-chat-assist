@@ -10,8 +10,8 @@ import { Eye, EyeOff } from "lucide-react";
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: "admin@atherenergy.com",
+    password: "admin123",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +28,7 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
     
+    console.log('Admin login attempt with:', formData.email);
     const { error } = await signInWithEmail(formData.email, formData.password);
     
     if (error) {
@@ -59,7 +60,7 @@ const AdminLogin = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@ather.energy"
+                placeholder="admin@atherenergy.com"
                 value={formData.email}
                 onChange={handleChange}
                 required

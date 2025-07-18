@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile to determine role
+          // Defer profile fetching to avoid blocking auth state changes
           setTimeout(async () => {
             try {
               const { data: profile } = await supabase
@@ -94,6 +94,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setIsCustomer(profile?.role === 'customer');
             } catch (error) {
               console.error('Error fetching user profile:', error);
+              // Default to customer role if profile fetch fails
+              setIsAdmin(false);
+              setIsCustomer(true);
             }
           }, 0);
         } else {
@@ -145,6 +148,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
+      console.log('Attempting to sign in with email:', email);
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -157,20 +162,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
+      } else {
+        console.log('Sign in successful');
       }
       
       return { error };
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('Sign in exception:', error);
       return { error };
     }
   };
 
   const signUpWithEmail = async (email: string, password: string, name?: string) => {
     try {
+      console.log('Attempting to sign up with email:', email);
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -182,31 +190,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
+        console.error('Sign up error:', error);
         toast({
           title: "Registration Failed",
           description: error.message,
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Registration Successful",
-          description: "Please check your email to verify your account.",
-        });
+        console.log('Sign up successful:', data);
+        if (!data.user?.email_confirmed_at) {
+          toast({
+            title: "Registration Successful",
+            description: "Please check your email to verify your account.",
+          });
+        }
       }
       
       return { error };
     } catch (error) {
-      console.error('Sign up error:', error);
+      console.error('Sign up exception:', error);
       return { error };
     }
   };
 
   const sendOTP = async (mobileNumber: string) => {
     try {
+      console.log('Sending OTP to:', mobileNumber);
+      
       // Generate OTP and store in database
       const { data: otpData, error: otpError } = await supabase.rpc('generate_otp');
       
       if (otpError) {
+        console.error('OTP generation error:', otpError);
         throw otpError;
       }
 
@@ -219,6 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
       if (insertError) {
+        console.error('OTP insert error:', insertError);
         throw insertError;
       }
 
