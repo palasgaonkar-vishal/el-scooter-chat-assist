@@ -24,7 +24,7 @@ import Chat from "@/pages/customer/Chat";
 import OrderStatus from "@/pages/customer/OrderStatus";
 
 import AdminLayout from "@/components/layout/AdminLayout";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminDashboard from "@/pages/admin/Dashboard";
 import EscalatedQueries from "@/pages/admin/EscalatedQueries";
 import FAQManagement from "@/pages/admin/FAQManagement";
 import Analytics from "@/pages/admin/Analytics";
