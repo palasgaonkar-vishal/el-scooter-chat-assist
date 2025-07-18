@@ -19,6 +19,7 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
   const customerNavItems = [
     { name: "Dashboard", path: "/dashboard" },
     { name: "Chat Support", path: "/chat" },
+    { name: "FAQ", path: "/faq" },
     { name: "Order Status", path: "/order-status" },
     { name: "Profile", path: "/profile" },
   ];

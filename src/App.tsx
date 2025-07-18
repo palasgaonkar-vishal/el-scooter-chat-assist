@@ -14,6 +14,7 @@ import CustomerLogin from "./pages/auth/CustomerLogin";
 import CustomerRegister from "./pages/auth/CustomerRegister";
 import Dashboard from "./pages/customer/Dashboard";
 import Chat from "./pages/customer/Chat";
+import FAQ from "./pages/customer/FAQ";
 import OrderStatus from "./pages/customer/OrderStatus";
 import Profile from "./pages/customer/Profile";
 
@@ -66,6 +67,14 @@ function App() {
               </ProtectedRoute>
             }>
               <Route index element={<Chat />} />
+            </Route>
+            
+            <Route path="/faq" element={
+              <ProtectedRoute>
+                <CustomerLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<FAQ />} />
             </Route>
             
             <Route path="/order-status" element={
