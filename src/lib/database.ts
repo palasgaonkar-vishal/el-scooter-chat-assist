@@ -129,10 +129,23 @@ export const db = {
     },
 
     async incrementViewCount(faqId: string): Promise<void> {
+      // First get the current view count
+      const { data: faq, error: fetchError } = await supabase
+        .from('faqs')
+        .select('view_count')
+        .eq('id', faqId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching FAQ for view count:', fetchError);
+        return;
+      }
+
+      // Then update with incremented value
       const { error } = await supabase
         .from('faqs')
         .update({ 
-          view_count: supabase.sql`view_count + 1` 
+          view_count: (faq?.view_count || 0) + 1
         })
         .eq('id', faqId);
 
