@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+
+type ScooterModel = Database['public']['Enums']['scooter_model'];
 
 interface Profile {
   id: string;
@@ -10,7 +13,7 @@ interface Profile {
   email?: string;
   address?: string;
   mobile_number?: string;
-  scooter_models?: string[];
+  scooter_models?: ScooterModel[];
   mobile_verified?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -20,7 +23,7 @@ interface ProfileUpdateData {
   name?: string;
   email?: string;
   address?: string;
-  scooter_models?: string[];
+  scooter_models?: ScooterModel[];
 }
 
 export const useProfile = () => {

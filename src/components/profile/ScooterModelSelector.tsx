@@ -3,8 +3,15 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import type { Database } from '@/integrations/supabase/types';
 
-const SCOOTER_MODELS = [
+type ScooterModel = Database['public']['Enums']['scooter_model'];
+
+const SCOOTER_MODELS: Array<{
+  id: ScooterModel;
+  name: string;
+  description: string;
+}> = [
   {
     id: '450S',
     name: '450S',
@@ -23,8 +30,8 @@ const SCOOTER_MODELS = [
 ];
 
 interface ScooterModelSelectorProps {
-  selectedModels: string[];
-  onSelectionChange: (models: string[]) => void;
+  selectedModels: ScooterModel[];
+  onSelectionChange: (models: ScooterModel[]) => void;
   disabled?: boolean;
 }
 
@@ -33,7 +40,7 @@ export const ScooterModelSelector: React.FC<ScooterModelSelectorProps> = ({
   onSelectionChange,
   disabled = false,
 }) => {
-  const handleModelToggle = (modelId: string) => {
+  const handleModelToggle = (modelId: ScooterModel) => {
     if (disabled) return;
 
     const updatedModels = selectedModels.includes(modelId)

@@ -12,6 +12,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Save, User } from 'lucide-react';
 import { ScooterModelSelector } from './ScooterModelSelector';
 import { toast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+
+type ScooterModel = Database['public']['Enums']['scooter_model'];
 
 const profileSchema = z.object({
   name: z.string().optional(),
@@ -28,7 +31,7 @@ interface Profile {
   email?: string;
   address?: string;
   mobile_number?: string;
-  scooter_models?: string[];
+  scooter_models?: ScooterModel[];
 }
 
 interface ProfileFormProps {
@@ -42,7 +45,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   onSubmit,
   isLoading = false,
 }) => {
-  const [selectedModels, setSelectedModels] = useState<string[]>(
+  const [selectedModels, setSelectedModels] = useState<ScooterModel[]>(
     profile?.scooter_models || []
   );
 
@@ -58,13 +61,13 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
       name: profile?.name || '',
       email: profile?.email || '',
       address: profile?.address || '',
-      scooter_models: profile?.scooter_models as ('450S' | '450X' | 'Rizta')[] || [],
+      scooter_models: profile?.scooter_models || [],
     },
   });
 
-  const handleModelSelectionChange = (models: string[]) => {
+  const handleModelSelectionChange = (models: ScooterModel[]) => {
     setSelectedModels(models);
-    setValue('scooter_models', models as ('450S' | '450X' | 'Rizta')[], {
+    setValue('scooter_models', models, {
       shouldDirty: true,
     });
   };
@@ -73,7 +76,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
     try {
       await onSubmit({
         ...data,
-        scooter_models: selectedModels as ('450S' | '450X' | 'Rizta')[],
+        scooter_models: selectedModels,
       });
       toast({
         title: "Profile Updated",
