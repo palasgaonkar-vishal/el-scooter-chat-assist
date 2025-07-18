@@ -84,47 +84,57 @@ export const db = {
     },
 
     async searchFAQs(searchText: string, scooterModel?: ScooterModel): Promise<{ faq: FAQ; similarity: number }[]> {
-      const { data, error } = await supabase.rpc('calculate_text_similarity', {
-        query_text: searchText,
-        faq_question: '',
-        faq_answer: ''
-      });
-
-      if (error) {
-        console.error('Error searching FAQs:', error);
-        return [];
-      }
-
-      // For now, return a simple text-based search
-      // The actual similarity calculation will be implemented in the FAQ matching system
+      // Get all active FAQs first
       let query = supabase
         .from('faqs')
         .select('*')
-        .eq('is_active', true)
-        .or(`question.ilike.%${searchText}%,answer.ilike.%${searchText}%,tags.cs.{${searchText}}`);
+        .eq('is_active', true);
 
       if (scooterModel) {
         query = query.contains('scooter_models', [scooterModel]);
       }
 
-      const { data: faqs, error: searchError } = await query;
+      const { data: faqs, error } = await query;
 
-      if (searchError) {
-        console.error('Error searching FAQs:', searchError);
+      if (error) {
+        console.error('Error fetching FAQs for search:', error);
         return [];
       }
 
-      // Return with mock similarity scores for now
-      return (faqs || []).map(faq => ({
-        faq,
-        similarity: Math.random() * 0.5 + 0.5 // Mock similarity between 0.5-1.0
-      }));
+      if (!faqs) return [];
+
+      // Calculate similarity for each FAQ using the database function
+      const results: { faq: FAQ; similarity: number }[] = [];
+
+      for (const faq of faqs) {
+        try {
+          const { data: similarity, error: simError } = await supabase.rpc('calculate_text_similarity', {
+            query_text: searchText,
+            faq_question: faq.question,
+            faq_answer: faq.answer
+          });
+
+          if (!simError && similarity !== null) {
+            results.push({ faq, similarity });
+          }
+        } catch (error) {
+          console.error('Error calculating similarity for FAQ:', faq.id, error);
+        }
+      }
+
+      // Sort by similarity score (highest first) and return top matches
+      return results
+        .sort((a, b) => b.similarity - a.similarity)
+        .slice(0, 10); // Return top 10 matches
     },
 
     async incrementViewCount(faqId: string): Promise<void> {
-      const { error } = await supabase.rpc('increment_faq_view_count', {
-        faq_id: faqId
-      });
+      const { error } = await supabase
+        .from('faqs')
+        .update({ 
+          view_count: supabase.sql`view_count + 1` 
+        })
+        .eq('id', faqId);
 
       if (error) {
         console.error('Error incrementing FAQ view count:', error);
