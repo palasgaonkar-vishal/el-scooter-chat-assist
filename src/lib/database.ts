@@ -6,6 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type FAQ = Database['public']['Tables']['faqs']['Row'];
 export type ChatConversation = Database['public']['Tables']['chat_conversations']['Row'];
+export type ChatSession = Database['public']['Tables']['chat_sessions']['Row'];
 export type Order = Database['public']['Tables']['orders']['Row'];
 export type EscalatedQuery = Database['public']['Tables']['escalated_queries']['Row'];
 export type Analytics = Database['public']['Tables']['analytics']['Row'];
@@ -157,6 +158,53 @@ export const db = {
 
   // Chat operations
   chats: {
+    async createSession(): Promise<ChatSession | null> {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .insert({
+          user_id: user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating chat session:', error);
+        return null;
+      }
+      return data;
+    },
+
+    async getSession(sessionId: string): Promise<ChatSession | null> {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching session:', error);
+        return null;
+      }
+      return data;
+    },
+
+    async updateSession(sessionId: string, updates: Partial<ChatSession>): Promise<ChatSession | null> {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', sessionId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating session:', error);
+        return null;
+      }
+      return data;
+    },
+
     async createConversation(sessionId: string, query: string, response?: string, faqMatchedId?: string, confidenceScore?: number): Promise<ChatConversation | null> {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -188,7 +236,7 @@ export const db = {
         .from('chat_conversations')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
 
       if (sessionId) {
         query = query.eq('session_id', sessionId);
@@ -201,6 +249,21 @@ export const db = {
         return [];
       }
       return data || [];
+    },
+
+    async updateConversation(conversationId: string, updates: Partial<ChatConversation>): Promise<ChatConversation | null> {
+      const { data, error } = await supabase
+        .from('chat_conversations')
+        .update(updates)
+        .eq('id', conversationId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating conversation:', error);
+        return null;
+      }
+      return data;
     }
   },
 

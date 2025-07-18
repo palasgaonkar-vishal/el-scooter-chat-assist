@@ -56,6 +56,8 @@ export type Database = {
         Row: {
           confidence_score: number | null
           created_at: string | null
+          escalated: boolean | null
+          escalated_at: string | null
           expires_at: string | null
           faq_matched_id: string | null
           file_urls: string[] | null
@@ -69,6 +71,8 @@ export type Database = {
         Insert: {
           confidence_score?: number | null
           created_at?: string | null
+          escalated?: boolean | null
+          escalated_at?: string | null
           expires_at?: string | null
           faq_matched_id?: string | null
           file_urls?: string[] | null
@@ -82,6 +86,8 @@ export type Database = {
         Update: {
           confidence_score?: number | null
           created_at?: string | null
+          escalated?: boolean | null
+          escalated_at?: string | null
           expires_at?: string | null
           faq_matched_id?: string | null
           file_urls?: string[] | null
@@ -102,6 +108,41 @@ export type Database = {
           },
           {
             foreignKeyName: "chat_conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_sessions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -400,6 +441,10 @@ export type Database = {
     Functions: {
       calculate_text_similarity: {
         Args: { query_text: string; faq_question: string; faq_answer: string }
+        Returns: number
+      }
+      cleanup_expired_chat_sessions: {
+        Args: Record<PropertyKey, never>
         Returns: number
       }
       cleanup_expired_chats: {
