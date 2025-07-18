@@ -219,8 +219,8 @@ export const useProcessAIResponse = () => {
       const profile = await db.profiles.getCurrentProfile();
       const userScooterModels = profile?.scooter_models || [];
 
-      // Search for matching FAQs using the corrected hook
-      const { data: faqResults } = await queryClient.fetchQuery({
+      // Search for matching FAQs using queryClient.fetchQuery (returns data directly)
+      const faqResults = await queryClient.fetchQuery({
         queryKey: ['faqs-search', query, userScooterModels],
         queryFn: async () => {
           if (!query.trim()) return [];
