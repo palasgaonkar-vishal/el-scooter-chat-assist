@@ -291,9 +291,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .update({ verified: true })
         .eq('id', otpVerification.id);
 
-      // Create user account with proper email format
+      // Create user account with proper email format for mobile customers
       const cleanNumber = mobileNumber.replace(/[^0-9]/g, '');
-      const email = `${cleanNumber}@atherenergy.com`;
+      const email = `${cleanNumber}@mobile.customer.ather.local`;
       const password = `mobile_${cleanNumber}_auth`;
 
       console.log('Creating user with email:', email);
