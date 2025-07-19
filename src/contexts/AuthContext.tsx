@@ -293,7 +293,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Create user account with proper email format
       const cleanNumber = mobileNumber.replace(/[^0-9]/g, '');
-      const email = `${cleanNumber}@mobile.ather.local`;
+      const email = `${cleanNumber}@atherenergy.com`;
       const password = `mobile_${cleanNumber}_auth`;
 
       console.log('Creating user with email:', email);

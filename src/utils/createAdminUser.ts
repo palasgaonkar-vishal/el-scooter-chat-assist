@@ -17,6 +17,8 @@ export const createAdminUser = async () => {
       }
     });
 
+    console.log('Admin credentials: admin@atherenergy.com / admin123');
+
     if (error) {
       if (error.message.includes('already registered') || error.message.includes('already been registered')) {
         console.log('Admin user already exists');
