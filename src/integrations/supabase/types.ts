@@ -463,6 +463,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown
