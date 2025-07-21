@@ -80,17 +80,17 @@ const Chat = () => {
   const stats = getSessionStats();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4">
+    <div className="max-w-4xl mx-auto space-y-4 p-4 sm:p-0">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Chat Support</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Chat Support</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Get instant help from our AI assistant powered by FAQ database
           </p>
         </div>
         
-        <Button variant="outline" onClick={handleNewSession}>
+        <Button variant="outline" onClick={handleNewSession} className="self-start">
           <RefreshCw className="h-4 w-4 mr-2" />
           New Chat
         </Button>
@@ -117,37 +117,37 @@ const Chat = () => {
       )}
 
       {/* Chat Interface */}
-      <Card className="h-[600px] flex flex-col">
-        <CardHeader className="flex-shrink-0">
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5" />
+      <Card className="flex flex-col" style={{ height: 'calc(100vh - 24rem)' }}>
+        <CardHeader className="flex-shrink-0 pb-2">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
             Ather Support Assistant
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="flex-1 flex flex-col p-0">
+        <CardContent className="flex-1 flex flex-col p-0 min-h-0">
           {/* Messages Area */}
-          <ScrollArea className="flex-1 px-6">
+          <ScrollArea className="flex-1 px-3 sm:px-6">
             <div className="space-y-1 pb-4">
               {/* Welcome Message */}
               {welcomeShown && messages.length === 0 && (
                 <div className="flex justify-start mb-4">
-                  <Card className="bg-muted max-w-[85%] sm:max-w-[70%]">
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-3">
-                        <Bot className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <Card className="bg-muted max-w-[95%] sm:max-w-[85%] md:max-w-[70%]">
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-start space-x-2 sm:space-x-3">
+                        <Bot className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-sm leading-relaxed">
+                          <p className="text-xs sm:text-sm leading-relaxed">
                             Hello! I'm your Ather support assistant. I can help you with:
                           </p>
-                          <ul className="text-sm mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                          <ul className="text-xs sm:text-sm mt-2 space-y-1 list-disc list-inside text-muted-foreground">
                             <li>Charging and battery issues</li>
                             <li>Service and maintenance questions</li>
                             <li>Range and performance queries</li>
                             <li>Order status and delivery updates</li>
                             <li>Warranty and cost information</li>
                           </ul>
-                          <p className="text-sm mt-2">
+                          <p className="text-xs sm:text-sm mt-2">
                             You can also upload images or documents to help me better understand your issue.
                           </p>
                           <p className="text-xs opacity-70 mt-2">
@@ -186,7 +186,7 @@ const Chat = () => {
             </div>
           </ScrollArea>
 
-          <Separator />
+          <Separator className="flex-shrink-0" />
 
           {/* Input Area */}
           <div className="flex-shrink-0">

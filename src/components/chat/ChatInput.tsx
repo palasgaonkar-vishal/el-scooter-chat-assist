@@ -51,7 +51,7 @@ export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }
 
   return (
     <Card className="border-t">
-      <CardContent className="p-4 space-y-3">
+      <CardContent className="p-3 sm:p-4 space-y-3">
         {/* File Upload Section */}
         <Collapsible open={showFileUpload} onOpenChange={setShowFileUpload}>
           <CollapsibleContent>
@@ -75,7 +75,7 @@ export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message here... (Shift+Enter for new line)"
-              className="min-h-[44px] max-h-[120px] resize-none"
+              className="min-h-[40px] sm:min-h-[44px] max-h-[100px] sm:max-h-[120px] resize-none text-sm sm:text-base"
               disabled={disabled || isLoading}
             />
           </div>
@@ -85,23 +85,23 @@ export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }
               type="button"
               variant="outline"
               size="icon"
-              className="h-11 w-11"
+              className="h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0"
               disabled={disabled || isLoading}
               onClick={() => setShowFileUpload(!showFileUpload)}
             >
-              <Paperclip className="h-4 w-4" />
+              <Paperclip className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
             
             <Button
               type="submit"
               size="icon"
-              className="h-11 w-11"
+              className="h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0"
               disabled={!canSend}
             >
               {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
               ) : (
-                <Send className="h-4 w-4" />
+                <Send className="h-3 w-3 sm:h-4 sm:w-4" />
               )}
             </Button>
           </div>
@@ -109,10 +109,13 @@ export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }
 
         {/* Input Helper Text */}
         <div className="text-xs text-muted-foreground">
-          <p>
+          <p className="hidden sm:block">
             • Ask questions about your Ather scooter
             • Upload images or documents for better assistance
             • Press Enter to send, Shift+Enter for new line
+          </p>
+          <p className="sm:hidden">
+            Tap the attachment icon to upload files
           </p>
         </div>
       </CardContent>
