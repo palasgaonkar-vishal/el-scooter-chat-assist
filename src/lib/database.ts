@@ -33,7 +33,7 @@ export const db = {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);
@@ -134,10 +134,15 @@ export const db = {
         .from('faqs')
         .select('view_count')
         .eq('id', faqId)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
         console.error('Error fetching FAQ for view count:', fetchError);
+        return;
+      }
+
+      if (!faq) {
+        console.error('FAQ not found for view count increment:', faqId);
         return;
       }
 
@@ -389,10 +394,9 @@ export const db = {
         .from('orders')
         .select('*')
         .eq('order_number', orderNumber)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') return null; // No data found
         console.error('Error fetching order:', error);
         return null;
       }
@@ -497,7 +501,7 @@ export const db = {
         .from('system_settings')
         .select('setting_value')
         .eq('setting_key', key)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching setting:', error);
