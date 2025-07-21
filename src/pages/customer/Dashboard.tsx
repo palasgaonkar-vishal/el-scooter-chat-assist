@@ -25,7 +25,7 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">
               Get instant help from our AI assistant
             </p>
-            <Link to="/chat">
+            <Link to="chat">
               <Button className="w-full mt-2" size="sm">
                 Start Chat
               </Button>
@@ -43,7 +43,7 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">
               Check your order progress
             </p>
-            <Link to="/order-status">
+            <Link to="orders">
               <Button className="w-full mt-2" size="sm" variant="outline">
                 View Orders
               </Button>
@@ -61,7 +61,7 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">
               Update your information
             </p>
-            <Link to="/profile">
+            <Link to="profile">
               <Button className="w-full mt-2" size="sm" variant="outline">
                 Edit Profile
               </Button>
@@ -79,9 +79,11 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">
               Find quick answers
             </p>
-            <Button className="w-full mt-2" size="sm" variant="outline">
-              Browse FAQs
-            </Button>
+            <Link to="faq">
+              <Button className="w-full mt-2" size="sm" variant="outline">
+                Browse FAQs
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
