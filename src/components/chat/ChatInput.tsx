@@ -81,17 +81,16 @@ export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }
           </div>
           
           <div className="flex space-x-1">
-            <CollapsibleTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-11 w-11"
-                disabled={disabled || isLoading}
-              >
-                <Paperclip className="h-4 w-4" />
-              </Button>
-            </CollapsibleTrigger>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-11 w-11"
+              disabled={disabled || isLoading}
+              onClick={() => setShowFileUpload(!showFileUpload)}
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
             
             <Button
               type="submit"
