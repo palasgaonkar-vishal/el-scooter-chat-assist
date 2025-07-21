@@ -51,7 +51,7 @@ export const useChat = () => {
         .from('chat_sessions')
         .select('*')
         .eq('id', currentSessionId)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching session:', error);
@@ -327,9 +327,12 @@ export const useProcessAIResponse = () => {
         })
         .eq('id', conversationId)
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error || !data) {
+        console.error('Error updating conversation:', error);
+        throw error || new Error('Failed to update conversation');
+      }
 
       // Create escalation if needed
       if (shouldEscalate) {
@@ -380,9 +383,12 @@ export const useRateResponse = () => {
         })
         .eq('id', conversationId)
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error || !data) {
+        console.error('Error updating conversation rating:', error);
+        throw error || new Error('Failed to update conversation rating');
+      }
 
       // Create escalation for negative feedback
       if (!isHelpful) {
@@ -404,7 +410,7 @@ export const useRateResponse = () => {
           .from('faqs')
           .select(column)
           .eq('id', data.faq_matched_id)
-          .single();
+          .maybeSingle();
 
         if (faq) {
           await supabase

@@ -185,7 +185,7 @@ export const db = {
         .from('chat_sessions')
         .select('*')
         .eq('id', sessionId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching session:', error);
@@ -200,7 +200,7 @@ export const db = {
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', sessionId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating session:', error);
@@ -261,7 +261,7 @@ export const db = {
         .update(updates)
         .eq('id', conversationId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating conversation:', error);
