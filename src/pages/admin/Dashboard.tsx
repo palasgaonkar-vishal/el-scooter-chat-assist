@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, MessageCircle, AlertTriangle, TrendingUp } from "lucide-react";
 
 const AdminDashboard = () => {
+  console.log('AdminDashboard component is rendering');
+  
   return (
     <div className="space-y-6">
       <div>
