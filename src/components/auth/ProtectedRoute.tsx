@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, isCustomer } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -29,6 +29,20 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     // Redirect to appropriate login page based on route
     const redirectTo = location.pathname.startsWith('/admin') ? '/admin/login' : '/login';
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
+
+  // Wait for role to be determined - if user exists but neither isAdmin nor isCustomer is true,
+  // the profile is still being fetched
+  if (user && !isAdmin && !isCustomer) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="space-y-4 w-full max-w-md">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-8 w-3/4" />
+        </div>
+      </div>
+    );
   }
 
   if (adminOnly && !isAdmin) {
