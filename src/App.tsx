@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AuthProvider } from "@/contexts/AuthContext";
+import { useServiceWorker, useInstallPrompt } from "@/hooks/usePWA";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 import Index from "@/pages/Index";
@@ -33,6 +34,9 @@ import OrderManagement from "@/pages/admin/OrderManagement";
 const queryClient = new QueryClient();
 
 function App() {
+  useServiceWorker();
+  useInstallPrompt();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
