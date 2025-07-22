@@ -28,7 +28,7 @@ export const useConfidenceThreshold = () => {
         .from('system_settings')
         .select('setting_value')
         .eq('setting_key', 'confidence_threshold')
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         console.log('Using default confidence threshold: 0.7');
@@ -176,7 +176,7 @@ export const useRateFAQ = () => {
         .from('faqs')
         .select('helpful_count, not_helpful_count')
         .eq('id', faqId)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
         throw fetchError;
@@ -192,7 +192,7 @@ export const useRateFAQ = () => {
         .update(updateData)
         .eq('id', faqId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;
@@ -228,7 +228,7 @@ export const useIncrementFAQView = () => {
         .from('faqs')
         .select('view_count')
         .eq('id', faqId)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
         throw fetchError;
@@ -242,7 +242,7 @@ export const useIncrementFAQView = () => {
         })
         .eq('id', faqId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;

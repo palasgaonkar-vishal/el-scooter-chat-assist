@@ -32,7 +32,7 @@ export const useCreateEscalation = () => {
           user_id: data.userId || user?.id,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return escalation;
@@ -133,7 +133,7 @@ export const useUpdateEscalation = () => {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -164,7 +164,7 @@ export const useAssignEscalation = () => {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -208,7 +208,7 @@ export const useResolveEscalation = () => {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;

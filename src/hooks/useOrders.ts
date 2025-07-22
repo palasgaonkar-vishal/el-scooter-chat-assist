@@ -62,7 +62,7 @@ export const useOrderByNumber = (orderNumber: string) => {
         .from('orders')
         .select('*')
         .eq('order_number', orderNumber)
-        .single();
+        .maybeSingle();
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -199,7 +199,7 @@ export const useUpdateOrderStatus = () => {
         .update(updates)
         .eq('id', orderId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;

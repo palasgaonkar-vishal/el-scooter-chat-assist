@@ -51,7 +51,7 @@ export const db = {
         .update(updates)
         .eq('id', user.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating profile:', error);
@@ -171,7 +171,7 @@ export const db = {
           user_id: user?.id,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error creating chat session:', error);
@@ -223,7 +223,7 @@ export const db = {
           confidence_score: confidenceScore
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error creating conversation:', error);
@@ -286,7 +286,7 @@ export const db = {
           status: 'pending'
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error creating escalated query:', error);
@@ -336,7 +336,7 @@ export const db = {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating escalated query:', error);
@@ -360,7 +360,7 @@ export const db = {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error resolving escalated query:', error);
@@ -451,7 +451,7 @@ export const db = {
         .update(updates)
         .eq('id', orderId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating order status:', error);

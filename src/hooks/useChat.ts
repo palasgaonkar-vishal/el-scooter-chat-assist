@@ -121,7 +121,7 @@ export const useChat = () => {
           user_id: user?.id,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       

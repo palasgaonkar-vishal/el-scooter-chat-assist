@@ -38,7 +38,7 @@ export const useProfile = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -75,7 +75,7 @@ export const useUpdateProfile = () => {
         })
         .eq('id', user.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Profile update error:', error);
@@ -123,7 +123,7 @@ export const useCreateProfile = () => {
           ...profileData,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Profile creation error:', error);

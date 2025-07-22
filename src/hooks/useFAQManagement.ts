@@ -41,7 +41,7 @@ export const useFAQManagement = () => {
           .from('faqs')
           .insert(faqData)
           .select()
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error creating FAQ:', error);
@@ -190,7 +190,7 @@ export const useFAQManagement = () => {
           .from('system_settings')
           .select('setting_value')
           .eq('setting_key', 'faq_confidence_threshold')
-          .single();
+          .maybeSingle();
 
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching confidence threshold:', error);
