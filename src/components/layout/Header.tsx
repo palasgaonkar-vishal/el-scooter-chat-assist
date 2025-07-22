@@ -18,17 +18,18 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
 
   const customerNavItems = [
     { name: "Dashboard", path: "/dashboard" },
-    { name: "Chat Support", path: "/chat" },
-    { name: "FAQ", path: "/faq" },
-    { name: "Order Status", path: "/order-status" },
-    { name: "Profile", path: "/profile" },
+    { name: "Chat Support", path: "/dashboard/chat" },
+    { name: "FAQ", path: "/dashboard/faq" },
+    { name: "Order Status", path: "/dashboard/orders" },
+    { name: "Profile", path: "/dashboard/profile" },
   ];
 
   const adminNavItems = [
-    { name: "Dashboard", path: "/admin/dashboard" },
+    { name: "Dashboard", path: "/admin" },
     { name: "FAQ Management", path: "/admin/faq" },
-    { name: "Escalated Queries", path: "/admin/queries" },
+    { name: "Escalated Queries", path: "/admin/escalated-queries" },
     { name: "Analytics", path: "/admin/analytics" },
+    { name: "Order Management", path: "/admin/orders" },
   ];
 
   const navItems = isAdmin ? adminNavItems : customerNavItems;
@@ -43,7 +44,7 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex">
-          <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="mr-6 flex items-center space-x-2">
+          <Link to={isAdmin ? "/admin" : "/dashboard"} className="mr-6 flex items-center space-x-2">
             <span className="font-bold text-lg">
               {isAdmin ? "Ather Admin" : "Ather Support"}
             </span>
@@ -78,20 +79,20 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex items-center">
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                {userIsAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin/dashboard" className="flex items-center">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Admin Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                )}
+                 <DropdownMenuItem asChild>
+                   <Link to="/dashboard/profile" className="flex items-center">
+                     <User className="h-4 w-4 mr-2" />
+                     Profile
+                   </Link>
+                 </DropdownMenuItem>
+                 {userIsAdmin && (
+                   <DropdownMenuItem asChild>
+                     <Link to="/admin" className="flex items-center">
+                       <Settings className="h-4 w-4 mr-2" />
+                       Admin Dashboard
+                     </Link>
+                   </DropdownMenuItem>
+                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="flex items-center text-destructive">
                   <LogOut className="h-4 w-4 mr-2" />
@@ -121,11 +122,11 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
               <div className="px-7">
-                <Link
-                  to={isAdmin ? "/admin/dashboard" : "/dashboard"}
-                  className="flex items-center"
-                  onClick={() => setIsOpen(false)}
-                >
+                 <Link
+                   to={isAdmin ? "/admin" : "/dashboard"}
+                   className="flex items-center"
+                   onClick={() => setIsOpen(false)}
+                 >
                   <span className="font-bold">
                     {isAdmin ? "Ather Admin" : "Ather Support"}
                   </span>
@@ -148,14 +149,14 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
                   
                   {user ? (
                     <>
-                      <Link
-                        to="/profile"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center text-foreground/60 hover:text-foreground/80 transition-colors mt-4 pt-4 border-t"
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        Profile
-                      </Link>
+                       <Link
+                         to="/dashboard/profile"
+                         onClick={() => setIsOpen(false)}
+                         className="flex items-center text-foreground/60 hover:text-foreground/80 transition-colors mt-4 pt-4 border-t"
+                       >
+                         <User className="h-4 w-4 mr-2" />
+                         Profile
+                       </Link>
                       <Button
                         variant="ghost"
                         onClick={() => {
