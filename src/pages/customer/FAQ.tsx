@@ -130,11 +130,11 @@ const FAQ = () => {
                 Can't find what you're looking for? Our support team is here to help.
               </p>
               <div className="flex justify-center gap-4">
-                <Link to="/chat" className="text-sm text-primary hover:underline">
+                <Link to="/dashboard/chat" className="text-sm text-primary hover:underline">
                   Contact Support
                 </Link>
                 <span className="text-muted-foreground">•</span>
-                <Link to="/chat" className="text-sm text-primary hover:underline">
+                <Link to="/dashboard/chat" className="text-sm text-primary hover:underline">
                   Start Live Chat
                 </Link>
               </div>
