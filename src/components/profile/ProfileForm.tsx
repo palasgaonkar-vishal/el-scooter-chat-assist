@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -54,7 +54,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
     handleSubmit,
     formState: { errors, isDirty },
     setValue,
-    watch,
+    reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -65,7 +65,21 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
     },
   });
 
+  // Update form when profile changes
+  useEffect(() => {
+    if (profile) {
+      reset({
+        name: profile.name || '',
+        email: profile.email || '',
+        address: profile.address || '',
+        scooter_models: profile.scooter_models || [],
+      });
+      setSelectedModels(profile.scooter_models || []);
+    }
+  }, [profile, reset]);
+
   const handleModelSelectionChange = (models: ScooterModel[]) => {
+    console.log('Scooter models selected:', models);
     setSelectedModels(models);
     setValue('scooter_models', models, {
       shouldDirty: true,
@@ -73,16 +87,19 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   };
 
   const onFormSubmit = async (data: ProfileFormData) => {
+    console.log('Form submission data:', data);
+    console.log('Selected models:', selectedModels);
+    
     try {
-      await onSubmit({
+      const formDataWithModels = {
         ...data,
         scooter_models: selectedModels,
-      });
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
-      });
+      };
+      
+      console.log('Final form data being submitted:', formDataWithModels);
+      await onSubmit(formDataWithModels);
     } catch (error) {
+      console.error('Form submission error:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update profile. Please try again.",

@@ -5,27 +5,24 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProfileForm } from '@/components/profile/ProfileForm';
-import { useProfile, useUpdateProfile, useCreateProfile } from '@/hooks/useProfile';
+import { useProfile, useUpsertProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
-import { AlertCircle, User, Settings } from 'lucide-react';
+import { AlertCircle, Settings } from 'lucide-react';
 
 const Profile = () => {
   const { user } = useAuth();
   const { data: profile, isLoading, error, refetch } = useProfile();
-  const updateProfileMutation = useUpdateProfile();
-  const createProfileMutation = useCreateProfile();
+  const upsertProfileMutation = useUpsertProfile();
 
   console.log('Profile page - User:', user?.id, 'Profile data:', profile, 'Loading:', isLoading, 'Error:', error);
 
   const handleProfileSubmit = async (formData: any) => {
     console.log('Profile form submitted:', formData);
     
-    if (profile) {
-      // Update existing profile
-      await updateProfileMutation.mutateAsync(formData);
-    } else {
-      // Create new profile
-      await createProfileMutation.mutateAsync(formData);
+    try {
+      await upsertProfileMutation.mutateAsync(formData);
+    } catch (error) {
+      console.error('Profile submission error:', error);
     }
   };
 
@@ -90,7 +87,7 @@ const Profile = () => {
         <ProfileForm
           profile={profile || undefined}
           onSubmit={handleProfileSubmit}
-          isLoading={updateProfileMutation.isPending || createProfileMutation.isPending}
+          isLoading={upsertProfileMutation.isPending}
         />
 
         {/* Profile Status Card */}
