@@ -163,18 +163,26 @@ const Dashboard = () => {
             <CardDescription>Common support requests</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="ghost" className="w-full justify-start">
-              Report a problem with my scooter
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              Schedule service appointment
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              Battery performance issues
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              Warranty information
-            </Button>
+            <Link to="/dashboard/chat?message=I'm experiencing an issue with my Ather scooter and need help with troubleshooting. Could you help me diagnose the problem?">
+              <Button variant="ghost" className="w-full justify-start">
+                Report a problem with my scooter
+              </Button>
+            </Link>
+            <Link to="/dashboard/chat?message=I need to schedule a service appointment for my Ather scooter. Can you help me book a service slot?">
+              <Button variant="ghost" className="w-full justify-start">
+                Schedule service appointment
+              </Button>
+            </Link>
+            <Link to="/dashboard/chat?message=I'm having battery performance issues with my Ather scooter. The range seems to be lower than expected and charging seems slower. Can you help?">
+              <Button variant="ghost" className="w-full justify-start">
+                Battery performance issues
+              </Button>
+            </Link>
+            <Link to="/dashboard/chat?message=I need information about my Ather scooter warranty coverage. Can you help me understand what's covered and how to claim warranty?">
+              <Button variant="ghost" className="w-full justify-start">
+                Warranty information
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

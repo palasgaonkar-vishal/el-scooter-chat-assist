@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import { useCustomerResolutionNotifications } from "@/hooks/useNotifications";
 import { toast } from "sonner";
 
 const Chat = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { messages, currentSessionId, isTyping, initializeSession } = useChat();
   const sendMessage = useSendMessage();
   const processAIResponse = useProcessAIResponse();
@@ -255,6 +257,8 @@ const Chat = () => {
               onSendMessage={handleSendMessage}
               disabled={!currentSessionId}
               isLoading={isProcessing || sendMessage.isPending}
+              initialMessage={searchParams.get('message') || ''}
+              onMessageUsed={() => setSearchParams({})}
             />
           </div>
         </CardContent>

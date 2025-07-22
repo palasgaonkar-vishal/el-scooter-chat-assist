@@ -11,12 +11,15 @@ interface ChatInputProps {
   onSendMessage: (message: string, files: File[]) => void;
   disabled?: boolean;
   isLoading?: boolean;
+  initialMessage?: string;
+  onMessageUsed?: () => void;
 }
 
-export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }: ChatInputProps) => {
-  const [message, setMessage] = useState('');
+export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false, initialMessage = '', onMessageUsed }: ChatInputProps) => {
+  const [message, setMessage] = useState(initialMessage);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [hasUsedInitialMessage, setHasUsedInitialMessage] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,6 +27,12 @@ export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }
     
     if (!message.trim() && selectedFiles.length === 0) return;
     if (disabled || isLoading) return;
+
+    // Clear the URL params if this is the initial message being used
+    if (initialMessage && !hasUsedInitialMessage && onMessageUsed) {
+      onMessageUsed();
+      setHasUsedInitialMessage(true);
+    }
 
     onSendMessage(message.trim(), selectedFiles);
     setMessage('');
@@ -46,6 +55,13 @@ export const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }
       textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
     }
   }, [message]);
+
+  // Set initial message when it changes
+  useEffect(() => {
+    if (initialMessage && !hasUsedInitialMessage) {
+      setMessage(initialMessage);
+    }
+  }, [initialMessage, hasUsedInitialMessage]);
 
   const canSend = (message.trim() || selectedFiles.length > 0) && !disabled && !isLoading;
 
