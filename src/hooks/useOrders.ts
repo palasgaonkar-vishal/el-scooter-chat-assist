@@ -267,7 +267,9 @@ export const validateCSVData = (data: any[]): { valid: CSVOrderData[]; invalid: 
     }
 
     if (row.amount !== undefined && row.amount !== null && row.amount !== '') {
+      console.log('Validating amount:', row.amount, 'Type:', typeof row.amount);
       const amountValue = parseFloat(row.amount);
+      console.log('Parsed amount:', amountValue, 'Is NaN:', isNaN(amountValue), 'Is <= 0:', amountValue <= 0);
       if (isNaN(amountValue) || amountValue <= 0) {
         errors.push('Amount must be a positive number');
       }
