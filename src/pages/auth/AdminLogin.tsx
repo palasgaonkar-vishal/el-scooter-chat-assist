@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,22 @@ const AdminLogin = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signInWithEmail, user, isAdmin } = useAuth();
+  const { signInWithEmail, user, isAdmin, isCustomer } = useAuth();
+  const navigate = useNavigate();
+
+  // Handle redirect after authentication and role determination
+  useEffect(() => {
+    if (user && (isAdmin || isCustomer)) {
+      console.log('User authenticated, role determined:', { isAdmin, isCustomer });
+      if (isAdmin) {
+        console.log('Redirecting admin to /admin');
+        navigate('/admin', { replace: true });
+      } else if (isCustomer) {
+        console.log('Redirecting customer to /dashboard');
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [user, isAdmin, isCustomer, navigate]);
 
   // Redirect if already authenticated
   if (user && isAdmin) {
@@ -33,6 +48,8 @@ const AdminLogin = () => {
     
     if (error) {
       console.error("Admin login error:", error);
+    } else {
+      console.log('Admin login successful, should redirect to /admin');
     }
     setIsLoading(false);
   };
