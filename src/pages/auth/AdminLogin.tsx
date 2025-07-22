@@ -32,10 +32,11 @@ const AdminLogin = () => {
     }
   }, [user, isAdmin, isCustomer, navigate]);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated and role is determined
   if (user && isAdmin) {
     return <Navigate to="/admin" replace />;
-  } else if (user && !isAdmin) {
+  } else if (user && isCustomer) {
+    // Only redirect customers if their role is confirmed as customer
     return <Navigate to="/dashboard" replace />;
   }
 
