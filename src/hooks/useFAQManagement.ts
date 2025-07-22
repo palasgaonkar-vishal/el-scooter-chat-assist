@@ -202,7 +202,7 @@ export const useFAQManagement = () => {
           throw error;
         }
         
-        return data ? parseFloat(data.setting_value) : 0.7; // Default 70%
+        return data ? parseFloat(data.setting_value) : 0.15; // Default 15%
       },
       staleTime: 30 * 60 * 1000, // 30 minutes
     });

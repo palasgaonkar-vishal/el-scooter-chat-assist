@@ -512,7 +512,7 @@ export const db = {
 
     async getConfidenceThreshold(): Promise<number> {
       const threshold = await this.getSetting('faq_confidence_threshold');
-      return threshold ? parseFloat(threshold) : 0.7;
+      return threshold ? parseFloat(threshold) : 0.15;
     }
   }
 };

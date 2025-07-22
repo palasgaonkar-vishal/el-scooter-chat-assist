@@ -265,8 +265,14 @@ export const useProcessAIResponse = () => {
             })
           );
 
-          // Get confidence threshold
-          const threshold = 0.7; // Default threshold
+          // Get confidence threshold from system settings
+          const { data: thresholdData } = await supabase
+            .from('system_settings')
+            .select('setting_value')
+            .eq('setting_key', 'faq_confidence_threshold')
+            .maybeSingle();
+          
+          const threshold = thresholdData ? parseFloat(thresholdData.setting_value) : 0.15;
           let filteredResults = resultsWithSimilarity.filter(
             (faq) => (faq.similarity_score || 0) >= threshold
           );

@@ -67,7 +67,7 @@ const FAQManagement: React.FC = () => {
   } = useFAQManagement();
 
   const { data: faqs = [], isLoading } = useAllFAQs();
-  const { data: currentThreshold = 0.7 } = useConfidenceThreshold();
+  const { data: currentThreshold = 0.15 } = useConfidenceThreshold();
   const createFAQ = useCreateFAQ();
   const updateFAQ = useUpdateFAQ();
   const deleteFAQ = useDeleteFAQ();
