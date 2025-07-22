@@ -109,8 +109,8 @@ const CSVUpload = () => {
   const downloadSampleCSV = () => {
     const sampleData = [
       'orderNumber,customerName,customerMobile,scooterModel,status,orderDate,deliveryDate,deliveryAddress,amount',
-      'ORD001,John Doe,+919876543210,450X,confirmed,2024-01-15,2024-01-25,"123 Main St, Bangalore",150000',
-      'ORD002,Jane Smith,+919876543211,Rizta,processing,2024-01-16,2024-01-26,"456 Park Ave, Mumbai",120000'
+      'ORD001,John Doe,9876543210,450X,confirmed,2024-01-15,2024-01-25,"123 Main St, Bangalore",150000',
+      'ORD002,Jane Smith,9876543211,Rizta,processing,2024-01-16,2024-01-26,"456 Park Ave, Mumbai",120000'
     ].join('\n');
 
     const blob = new Blob([sampleData], { type: 'text/csv' });
