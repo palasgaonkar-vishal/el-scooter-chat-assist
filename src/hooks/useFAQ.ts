@@ -22,17 +22,17 @@ interface FAQWithSimilarity extends FAQ {
 // Get system settings for confidence threshold
 export const useConfidenceThreshold = () => {
   return useQuery({
-    queryKey: ['system-settings', 'confidence_threshold'],
+    queryKey: ['system-settings', 'faq_confidence_threshold'],
     queryFn: async (): Promise<number> => {
       const { data, error } = await supabase
         .from('system_settings')
         .select('setting_value')
-        .eq('setting_key', 'confidence_threshold')
+        .eq('setting_key', 'faq_confidence_threshold')
         .maybeSingle();
 
       if (error || !data) {
-        console.log('Using default confidence threshold: 0.7');
-        return 0.7; // Default threshold
+        console.log('Using default FAQ confidence threshold: 0.15');
+        return 0.15; // Default threshold that works better for text similarity
       }
 
       return parseFloat(data.setting_value);
@@ -128,7 +128,7 @@ export const useSearchFAQs = (searchQuery: string, userScooterModels?: ScooterMo
       );
 
       // Filter by confidence threshold
-      const threshold = confidenceThreshold || 0.7;
+      const threshold = confidenceThreshold || 0.15;
       let filteredResults = resultsWithSimilarity.filter(
         (faq) => (faq.similarity_score || 0) >= threshold
       );
