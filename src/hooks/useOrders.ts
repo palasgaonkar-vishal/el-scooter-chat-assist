@@ -36,13 +36,14 @@ export const useOrdersByMobile = (mobileNumber: string) => {
       // Try both with and without country code prefix
       const normalizedNumber = mobileNumber.replace(/^\+91/, ''); // Remove +91 if present
       const withPrefix = mobileNumber.startsWith('+91') ? mobileNumber : `+91${mobileNumber}`;
+      const exactMatch = mobileNumber; // Also try exact match
 
-      console.log('Searching for orders with numbers:', [mobileNumber, normalizedNumber, withPrefix]);
+      console.log('Searching for orders with numbers:', [exactMatch, normalizedNumber, withPrefix]);
 
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .in('customer_mobile', [mobileNumber, normalizedNumber, withPrefix])
+        .in('customer_mobile', [exactMatch, normalizedNumber, withPrefix])
         .order('created_at', { ascending: false });
 
       console.log('Query result:', { data, error });
