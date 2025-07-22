@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -65,26 +65,32 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
     },
   });
 
-  // Update form when profile changes
-  useEffect(() => {
-    if (profile) {
-      reset({
-        name: profile.name || '',
-        email: profile.email || '',
-        address: profile.address || '',
-        scooter_models: profile.scooter_models || [],
-      });
-      setSelectedModels(profile.scooter_models || []);
-    }
-  }, [profile, reset]);
+  // Memoize profile values to prevent unnecessary re-renders
+  const profileValues = useMemo(() => {
+    if (!profile) return null;
+    return {
+      name: profile.name || '',
+      email: profile.email || '',
+      address: profile.address || '',
+      scooter_models: profile.scooter_models || [],
+    };
+  }, [profile?.id, profile?.name, profile?.email, profile?.address, profile?.scooter_models]);
 
-  const handleModelSelectionChange = (models: ScooterModel[]) => {
+  // Update form when profile values actually change
+  useEffect(() => {
+    if (profileValues) {
+      reset(profileValues);
+      setSelectedModels(profileValues.scooter_models);
+    }
+  }, [profileValues, reset]);
+
+  const handleModelSelectionChange = useCallback((models: ScooterModel[]) => {
     console.log('Scooter models selected:', models);
     setSelectedModels(models);
     setValue('scooter_models', models, {
       shouldDirty: true,
     });
-  };
+  }, [setValue]);
 
   const onFormSubmit = async (data: ProfileFormData) => {
     console.log('Form submission data:', data);
