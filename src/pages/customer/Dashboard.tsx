@@ -1,10 +1,39 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Package, User, HelpCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MessageCircle, Package, User, HelpCircle, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useUserActivity } from "@/hooks/useUserActivity";
 
 const Dashboard = () => {
+  const { data: activities, isLoading: isActivitiesLoading } = useUserActivity();
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'chat':
+        return <MessageCircle className="h-4 w-4" />;
+      case 'order':
+        return <Package className="h-4 w-4" />;
+      case 'escalation':
+        return <AlertTriangle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
+    }
+  };
+
+  const getStatusBadge = (status?: string) => {
+    if (!status) return null;
+    
+    const variant = status === 'completed' || status === 'delivered' || status === 'resolved' 
+      ? 'default' 
+      : status === 'pending' || status === 'processing'
+      ? 'secondary'
+      : 'destructive';
+    
+    return <Badge variant={variant} className="text-xs">{status}</Badge>;
+  };
+
   return (
     <div className="space-y-6 px-4 sm:px-0">
       <div>
@@ -95,12 +124,36 @@ const Dashboard = () => {
             <CardDescription>Your latest interactions with support</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">No recent activity</p>
-              <p className="text-xs text-muted-foreground">
-                Your support conversations and order updates will appear here
-              </p>
-            </div>
+            {isActivitiesLoading ? (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Loading recent activity...</p>
+              </div>
+            ) : activities && activities.length > 0 ? (
+              <div className="space-y-3">
+                {activities.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3 p-2 rounded-lg border">
+                    <div className="flex-shrink-0 mt-0.5 text-muted-foreground">
+                      {getActivityIcon(activity.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium truncate">{activity.title}</p>
+                        {getStatusBadge(activity.status)}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">{activity.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{activity.date}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">No recent activity</p>
+                <p className="text-xs text-muted-foreground">
+                  Your support conversations and order updates will appear here
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
