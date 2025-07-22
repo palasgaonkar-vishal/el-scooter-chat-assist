@@ -236,7 +236,7 @@ const FAQManagement: React.FC = () => {
                   </div>
                 </div>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -349,9 +349,9 @@ const FAQManagement: React.FC = () => {
                           className="mt-1"
                         />
                         <div className="flex-1 space-y-2">
-                          <div className="flex items-start justify-between">
-                            <h4 className="font-medium text-sm line-clamp-2">{faq.question}</h4>
-                            <div className="flex items-center gap-2 ml-4">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                            <h4 className="font-medium text-sm line-clamp-2 flex-1">{faq.question}</h4>
+                            <div className="flex flex-wrap items-center gap-2 sm:ml-4">
                               <Badge variant={faq.is_active ? "default" : "secondary"}>
                                 {faq.is_active ? "Active" : "Inactive"}
                               </Badge>
@@ -361,12 +361,12 @@ const FAQManagement: React.FC = () => {
                             </div>
                           </div>
                           
-                          <p className="text-sm text-muted-foreground line-clamp-2">
+                          <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-3">
                             {faq.answer}
                           </p>
 
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Eye className="h-3 w-3" />
                                 {faq.view_count || 0} views
@@ -381,7 +381,7 @@ const FAQManagement: React.FC = () => {
                               </span>
                             </div>
                             
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"

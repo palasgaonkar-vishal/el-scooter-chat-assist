@@ -89,12 +89,12 @@ export const EscalationCard = ({ escalation, isAdmin = false }: EscalationCardPr
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Escalated Query #{escalation.id.slice(-8)}
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+          <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="break-all">Escalated Query #{escalation.id.slice(-8)}</span>
           </CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Badge className={priorityColors[escalation.priority || 'medium']}>
               {escalation.priority?.toUpperCase()}
             </Badge>
@@ -104,7 +104,7 @@ export const EscalationCard = ({ escalation, isAdmin = false }: EscalationCardPr
           </div>
         </div>
         
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
             {formatDate(escalation.escalated_at)}
@@ -112,7 +112,7 @@ export const EscalationCard = ({ escalation, isAdmin = false }: EscalationCardPr
           {escalation.profiles && (
             <div className="flex items-center gap-1">
               <User className="h-4 w-4" />
-              {escalation.profiles.name || escalation.profiles.email || 'Unknown User'}
+              <span className="break-words">{escalation.profiles.name || escalation.profiles.email || 'Unknown User'}</span>
             </div>
           )}
         </div>
@@ -171,7 +171,7 @@ export const EscalationCard = ({ escalation, isAdmin = false }: EscalationCardPr
         {/* Admin Controls */}
         {isAdmin && (
           <div className="space-y-4 border-t pt-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Status</label>
                 <Select value={selectedStatus} onValueChange={handleStatusUpdate}>
@@ -222,7 +222,7 @@ export const EscalationCard = ({ escalation, isAdmin = false }: EscalationCardPr
                   placeholder="Provide resolution for the customer..."
                   className="min-h-24"
                 />
-                <div className="flex gap-2 mt-2">
+                <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <Button
                     onClick={handleResolve}
                     disabled={!resolution.trim() || resolveEscalation.isPending}
@@ -259,7 +259,7 @@ export const EscalationCard = ({ escalation, isAdmin = false }: EscalationCardPr
               <p className="text-sm">{escalation.admin_notes}</p>
             </div>
           </div>
-        )}
+         )}
       </CardContent>
     </Card>
   );

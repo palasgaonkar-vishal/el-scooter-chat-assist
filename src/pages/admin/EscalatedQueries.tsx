@@ -52,11 +52,11 @@ const EscalatedQueries = () => {
       {/* Query Management */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-xl font-semibold">Query Management</CardTitle>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 w-full sm:w-auto">
               <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as EscalationStatus | 'all')}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -72,22 +72,22 @@ const EscalatedQueries = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="list" className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                All ({allQueries?.length || 0})
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+              <TabsTrigger value="list" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">All</span> ({allQueries?.length || 0})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Pending ({pendingQueries?.length || 0})
+              <TabsTrigger value="pending" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Pending</span> ({pendingQueries?.length || 0})
               </TabsTrigger>
-              <TabsTrigger value="in_progress" className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                In Progress ({inProgressQueries?.length || 0})
+              <TabsTrigger value="in_progress" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">In Progress</span> ({inProgressQueries?.length || 0})
               </TabsTrigger>
-              <TabsTrigger value="resolved" className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Resolved ({resolvedQueries?.length || 0})
+              <TabsTrigger value="resolved" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Resolved</span> ({resolvedQueries?.length || 0})
               </TabsTrigger>
             </TabsList>
 

@@ -117,7 +117,7 @@ const Chat = () => {
       )}
 
       {/* Chat Interface */}
-      <Card className="flex flex-col" style={{ height: 'calc(100vh - 24rem)' }}>
+      <Card className="flex flex-col" style={{ height: 'calc(100vh - 20rem)' }}>
         <CardHeader className="flex-shrink-0 pb-2">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Bot className="h-4 w-4 sm:h-5 sm:w-5" />

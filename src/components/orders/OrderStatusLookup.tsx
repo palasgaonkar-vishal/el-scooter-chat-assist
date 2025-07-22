@@ -112,24 +112,24 @@ const OrderStatusLookup = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Button
               variant={searchType === 'mobile' ? 'default' : 'outline'}
               onClick={() => setSearchType('mobile')}
-              className="flex-1"
+              className="flex-1 text-xs sm:text-sm"
             >
-              Search by Mobile Number
+              Search by Mobile
             </Button>
             <Button
               variant={searchType === 'order' ? 'default' : 'outline'}
               onClick={() => setSearchType('order')}
-              className="flex-1"
+              className="flex-1 text-xs sm:text-sm"
             >
-              Search by Order Number
+              Search by Order
             </Button>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder={
                 searchType === 'mobile' 
@@ -274,7 +274,7 @@ const OrderCard = ({ order }: { order: Order }) => {
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
             <Package className="h-4 w-4 text-muted-foreground" />
             <div>
