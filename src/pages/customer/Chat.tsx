@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Bot, AlertTriangle, RefreshCw } from "lucide-react";
+import { Bot, AlertTriangle, RefreshCw, Bell } from "lucide-react";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ChatInput } from "@/components/chat/ChatInput";
+import { ResolutionCard } from "@/components/chat/ResolutionCard";
 import { useChat, useSendMessage, useProcessAIResponse } from "@/hooks/useChat";
+import { useUserEscalatedQueries } from "@/hooks/useEscalation";
+import { useCustomerResolutionNotifications } from "@/hooks/useNotifications";
 import { toast } from "sonner";
 
 const Chat = () => {
@@ -17,8 +20,19 @@ const Chat = () => {
   const processAIResponse = useProcessAIResponse();
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Escalation notifications and resolutions
+  const { data: userEscalations = [] } = useUserEscalatedQueries();
+  const { unreadResolutions, markResolutionAsRead, clearAllResolutions } = useCustomerResolutionNotifications();
+
   // Initialize with welcome message
   const [welcomeShown, setWelcomeShown] = useState(false);
+  const [showResolutions, setShowResolutions] = useState(false);
+
+  // Show resolutions that are resolved
+  const resolvedEscalations = userEscalations.filter(e => e.status === 'resolved');
+  const hasUnreadResolutions = unreadResolutions.length > 0 || resolvedEscalations.some(e => 
+    e.resolved_at && new Date(e.resolved_at) > new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+  );
 
   useEffect(() => {
     if (currentSessionId && !welcomeShown && messages.length === 0) {
@@ -90,10 +104,27 @@ const Chat = () => {
           </p>
         </div>
         
-        <Button variant="outline" onClick={handleNewSession} className="self-start">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          New Chat
-        </Button>
+        <div className="flex gap-2">
+          {hasUnreadResolutions && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowResolutions(!showResolutions)}
+              className="self-start relative"
+            >
+              <Bell className="h-4 w-4 mr-2" />
+              Responses
+              {(unreadResolutions.length > 0) && (
+                <Badge variant="destructive" className="ml-1 text-xs">
+                  {unreadResolutions.length}
+                </Badge>
+              )}
+            </Button>
+          )}
+          <Button variant="outline" onClick={handleNewSession} className="self-start">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            New Chat
+          </Button>
+        </div>
       </div>
 
       {/* Session Stats */}
@@ -111,6 +142,36 @@ const Chat = () => {
               <Badge variant="outline" className="text-xs">
                 Session Active
               </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Admin Resolutions */}
+      {showResolutions && resolvedEscalations.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Support Responses
+              </CardTitle>
+              {unreadResolutions.length > 0 && (
+                <Button variant="outline" size="sm" onClick={clearAllResolutions}>
+                  Mark all as read
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {resolvedEscalations.map((escalation) => (
+                <ResolutionCard
+                  key={escalation.id}
+                  escalation={escalation}
+                  onMarkAsRead={() => markResolutionAsRead(escalation.id)}
+                />
+              ))}
             </div>
           </CardContent>
         </Card>

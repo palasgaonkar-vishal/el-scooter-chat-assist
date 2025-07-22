@@ -13,10 +13,13 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useAdminEscalationNotifications } from "@/hooks/useNotifications";
+import { NotificationBadge } from "@/components/notifications/NotificationBadge";
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { pendingCount, newEscalationCount, clearNewEscalationCount } = useAdminEscalationNotifications();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -40,7 +43,8 @@ const AdminLayout = () => {
       name: "Escalated Queries",
       href: "/admin/escalated-queries",
       icon: MessageSquareWarning,
-      current: location.pathname === "/admin/escalated-queries"
+      current: location.pathname === "/admin/escalated-queries",
+      badge: pendingCount
     },
     {
       name: "Order Management",
@@ -81,11 +85,16 @@ const AdminLayout = () => {
                     <Link
                       key={item.name}
                       to={item.href}
+                      onClick={() => {
+                        if (item.name === "Escalated Queries") {
+                          clearNewEscalationCount();
+                        }
+                      }}
                       className={cn(
                         item.current
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors"
+                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors relative"
                       )}
                     >
                       <Icon
@@ -95,6 +104,9 @@ const AdminLayout = () => {
                         aria-hidden="true"
                       />
                       {item.name}
+                      {item.badge && item.badge > 0 && (
+                        <NotificationBadge count={item.badge} className="ml-auto" />
+                      )}
                     </Link>
                   );
                 })}
