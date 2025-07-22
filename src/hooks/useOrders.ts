@@ -33,10 +33,14 @@ export const useOrdersByMobile = (mobileNumber: string) => {
     queryFn: async (): Promise<Order[]> => {
       if (!mobileNumber || mobileNumber.length < 10) return [];
 
+      // Try both with and without country code prefix
+      const normalizedNumber = mobileNumber.replace(/^\+91/, ''); // Remove +91 if present
+      const withPrefix = mobileNumber.startsWith('+91') ? mobileNumber : `+91${mobileNumber}`;
+
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .eq('customer_mobile', mobileNumber)
+        .or(`customer_mobile.eq.${mobileNumber},customer_mobile.eq.${normalizedNumber},customer_mobile.eq.${withPrefix}`)
         .order('created_at', { ascending: false });
 
       if (error) {
