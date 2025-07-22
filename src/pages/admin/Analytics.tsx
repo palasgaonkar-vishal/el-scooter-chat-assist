@@ -3,15 +3,30 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { useAnalytics } from "@/hooks/useAnalytics";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
+import { useAnalytics, useRealTimeAnalytics } from "@/hooks/useAnalytics";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const Analytics = () => {
   const [period, setPeriod] = useState<'24hours' | '7days' | '30days' | '90days'>('7days');
   const { data: analyticsData, isLoading, error } = useAnalytics(period);
+  const realTimeUpdates = useRealTimeAnalytics(period);
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
+
+  const getTrendIcon = (change: number) => {
+    if (change > 0) return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (change < 0) return <TrendingDown className="h-4 w-4 text-red-600" />;
+    return <Minus className="h-4 w-4 text-gray-400" />;
+  };
+
+  const getTrendColor = (change: number) => {
+    if (change > 0) return "text-green-600";
+    if (change < 0) return "text-red-600";
+    return "text-gray-400";
+  };
 
   if (isLoading) {
     return (
@@ -24,8 +39,8 @@ const Analytics = () => {
             </p>
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {[...Array(5)].map((_, i) => (
             <Card key={i}>
               <CardHeader>
                 <Skeleton className="h-4 w-24" />
@@ -84,14 +99,15 @@ const Analytics = () => {
         </Select>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Chats</CardTitle>
+            {getTrendIcon(analyticsData.weeklyChange.chats)}
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{analyticsData.totalChats.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
+            <p className={`text-xs ${getTrendColor(analyticsData.weeklyChange.chats)}`}>
               {analyticsData.weeklyChange.chats > 0 ? '+' : ''}{analyticsData.weeklyChange.chats}% from last period
             </p>
           </CardContent>
@@ -100,10 +116,11 @@ const Analytics = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Resolution Rate</CardTitle>
+            {getTrendIcon(analyticsData.weeklyChange.resolution)}
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{analyticsData.resolutionRate}%</div>
-            <p className="text-xs text-muted-foreground">
+            <p className={`text-xs ${getTrendColor(analyticsData.weeklyChange.resolution)}`}>
               {analyticsData.weeklyChange.resolution > 0 ? '+' : ''}{analyticsData.weeklyChange.resolution}% from last period
             </p>
           </CardContent>
@@ -111,12 +128,28 @@ const Analytics = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
+            <CardTitle className="text-sm font-medium">User Satisfaction</CardTitle>
+            {getTrendIcon(analyticsData.weeklyChange.satisfaction)}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.avgResponseTime}min</div>
+            <div className="text-2xl font-bold">{analyticsData.userSatisfactionScore}%</div>
+            <p className={`text-xs ${getTrendColor(analyticsData.weeklyChange.satisfaction)}`}>
+              {analyticsData.weeklyChange.satisfaction > 0 ? '+' : ''}{analyticsData.weeklyChange.satisfaction}% from last period
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Escalation Rate</CardTitle>
+            <Badge variant={analyticsData.escalationRate > 30 ? "destructive" : "secondary"}>
+              {analyticsData.escalationRate > 30 ? "High" : "Normal"}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{analyticsData.escalationRate}%</div>
             <p className="text-xs text-muted-foreground">
-              {analyticsData.weeklyChange.responseTime > 0 ? '+' : ''}{analyticsData.weeklyChange.responseTime}s from last period
+              {analyticsData.escalationRate <= 30 ? 'Within target' : 'Above target'} (≤30%)
             </p>
           </CardContent>
         </Card>
@@ -124,6 +157,9 @@ const Analytics = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">FAQ Hit Rate</CardTitle>
+            <Badge variant={analyticsData.faqHitRate >= 70 ? "default" : "destructive"}>
+              {analyticsData.faqHitRate >= 70 ? "Good" : "Low"}
+            </Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{analyticsData.faqHitRate}%</div>
@@ -137,6 +173,7 @@ const Analytics = () => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="satisfaction">Satisfaction</TabsTrigger>
           <TabsTrigger value="faq">FAQ Analytics</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
@@ -155,8 +192,9 @@ const Analytics = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="chats" fill="#8884d8" />
-                    <Bar dataKey="resolved" fill="#82ca9d" />
+                    <Bar dataKey="chats" fill="#8884d8" name="Total Chats" />
+                    <Bar dataKey="resolved" fill="#82ca9d" name="Resolved" />
+                    <Bar dataKey="escalated" fill="#ff7c7c" name="Escalated" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -177,6 +215,70 @@ const Analytics = () => {
                     <Line type="monotone" dataKey="avgTime" stroke="#8884d8" />
                   </LineChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="satisfaction" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Satisfaction Trend</CardTitle>
+                <CardDescription>Daily user satisfaction over time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={analyticsData.satisfactionTrend}>
+                    <defs>
+                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#82ca9d" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="score" stroke="#82ca9d" fillOpacity={1} fill="url(#colorScore)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Top FAQ Performance</CardTitle>
+                <CardDescription>FAQ questions with highest satisfaction</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {analyticsData.topFAQQuestions.length > 0 ? (
+                    analyticsData.topFAQQuestions.map((faq, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium">{faq.question}</p>
+                          <Badge variant="outline">{faq.hits} views</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-muted rounded-full h-2">
+                            <div 
+                              className="bg-green-500 h-2 rounded-full" 
+                              style={{ 
+                                width: `${faq.totalVotes > 0 ? (faq.helpfulVotes / faq.totalVotes) * 100 : 0}%` 
+                              }}
+                            />
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {faq.totalVotes > 0 ? Math.round((faq.helpfulVotes / faq.totalVotes) * 100) : 0}% helpful
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No satisfaction data available</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
