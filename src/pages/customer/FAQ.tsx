@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Grid, TrendingUp } from 'lucide-react';
@@ -129,13 +130,13 @@ const FAQ = () => {
                 Can't find what you're looking for? Our support team is here to help.
               </p>
               <div className="flex justify-center gap-4">
-                <button className="text-sm text-primary hover:underline">
+                <Link to="/chat" className="text-sm text-primary hover:underline">
                   Contact Support
-                </button>
+                </Link>
                 <span className="text-muted-foreground">•</span>
-                <button className="text-sm text-primary hover:underline">
+                <Link to="/chat" className="text-sm text-primary hover:underline">
                   Start Live Chat
-                </button>
+                </Link>
               </div>
             </div>
           </CardContent>
