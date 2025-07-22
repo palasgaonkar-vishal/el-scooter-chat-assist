@@ -19,7 +19,7 @@ const AdminLogin = () => {
 
   // Redirect if already authenticated
   if (user && isAdmin) {
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   } else if (user && !isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
