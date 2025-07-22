@@ -37,11 +37,15 @@ export const useOrdersByMobile = (mobileNumber: string) => {
       const normalizedNumber = mobileNumber.replace(/^\+91/, ''); // Remove +91 if present
       const withPrefix = mobileNumber.startsWith('+91') ? mobileNumber : `+91${mobileNumber}`;
 
+      console.log('Searching for orders with numbers:', [mobileNumber, normalizedNumber, withPrefix]);
+
       const { data, error } = await supabase
         .from('orders')
         .select('*')
         .in('customer_mobile', [mobileNumber, normalizedNumber, withPrefix])
         .order('created_at', { ascending: false });
+
+      console.log('Query result:', { data, error });
 
       if (error) {
         console.error('Error fetching orders by mobile:', error);

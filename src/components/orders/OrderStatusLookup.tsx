@@ -27,8 +27,10 @@ const OrderStatusLookup = () => {
 
   const handleSearch = () => {
     if (searchType === 'mobile') {
+      console.log('Searching for mobile number:', mobileNumber);
       setSearchValue(mobileNumber);
     } else {
+      console.log('Searching for order number:', orderNumber);
       setSearchValue(orderNumber);
     }
   };
