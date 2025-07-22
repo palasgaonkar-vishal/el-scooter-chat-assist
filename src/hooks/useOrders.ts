@@ -33,17 +33,27 @@ export const useOrdersByMobile = (mobileNumber: string) => {
     queryFn: async (): Promise<Order[]> => {
       if (!mobileNumber || mobileNumber.length < 10) return [];
 
-      // Try both with and without country code prefix
+      // Create all possible mobile number format variations
       const normalizedNumber = mobileNumber.replace(/^\+91/, ''); // Remove +91 if present
       const withPrefix = mobileNumber.startsWith('+91') ? mobileNumber : `+91${mobileNumber}`;
       const exactMatch = mobileNumber; // Also try exact match
+      
+      // Additional variations to handle edge cases
+      const variations = [
+        exactMatch,
+        normalizedNumber,
+        withPrefix
+      ];
+      
+      // Remove duplicates
+      const uniqueVariations = [...new Set(variations)];
 
-      console.log('Searching for orders with numbers:', [exactMatch, normalizedNumber, withPrefix]);
+      console.log('Searching for orders with numbers:', uniqueVariations);
 
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .in('customer_mobile', [exactMatch, normalizedNumber, withPrefix])
+        .in('customer_mobile', uniqueVariations)
         .order('created_at', { ascending: false });
 
       console.log('Query result:', { data, error });
