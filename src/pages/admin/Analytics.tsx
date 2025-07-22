@@ -14,7 +14,7 @@ const Analytics = () => {
   const { data: analyticsData, isLoading, error } = useAnalytics(period);
   const realTimeUpdates = useRealTimeAnalytics(period);
 
-  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98fb98'];
 
   const getTrendIcon = (change: number) => {
     if (change > 0) return <TrendingUp className="h-4 w-4 text-green-600" />;
