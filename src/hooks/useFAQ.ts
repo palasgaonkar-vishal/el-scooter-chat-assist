@@ -238,6 +238,10 @@ export const useIncrementFAQView = () => {
         throw fetchError;
       }
 
+      if (!currentFAQ) {
+        throw new Error('FAQ not found');
+      }
+
       // Update with incremented value
       const { data, error } = await supabase
         .from('faqs')
