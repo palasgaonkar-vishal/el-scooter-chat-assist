@@ -298,30 +298,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Creating user with email:', email);
 
-      // Try to sign up the user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name: name || '',
-            mobile_number: mobileNumber,
-          }
-        }
-      });
-
-      if (signUpError && !signUpError.message.includes('already registered')) {
-        console.error('Sign up error:', signUpError);
-        throw signUpError;
-      }
-
-      // Sign in the user
+      // First try to sign in the user (most common case for existing users)
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (signInError) {
+      // If sign in fails because user doesn't exist, then create the account
+      if (signInError && signInError.message.includes('Invalid login credentials')) {
+        console.log('User not found, creating new account');
+        
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name: name || '',
+              mobile_number: mobileNumber,
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error('Sign up error:', signUpError);
+          throw signUpError;
+        }
+
+        // Sign in the newly created user
+        const { error: newUserSignInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (newUserSignInError) {
+          console.error('New user sign in error:', newUserSignInError);
+          throw newUserSignInError;
+        }
+      } else if (signInError) {
         console.error('Sign in error:', signInError);
         throw signInError;
       }
