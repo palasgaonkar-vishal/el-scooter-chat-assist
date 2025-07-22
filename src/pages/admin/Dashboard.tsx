@@ -1,13 +1,70 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, MessageCircle, AlertTriangle, TrendingUp } from "lucide-react";
+import { Users, MessageCircle, AlertTriangle, TrendingUp, UserPlus } from "lucide-react";
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
+import { createAdminUser } from "@/utils/createAdminUser";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const AdminDashboard = () => {
   const { data: metrics, isLoading, error } = useDashboardMetrics();
+  const [isCreateAdminOpen, setIsCreateAdminOpen] = useState(false);
+  const [newAdminData, setNewAdminData] = useState({
+    email: '',
+    password: '',
+    name: ''
+  });
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreateAdmin = async () => {
+    if (!newAdminData.email || !newAdminData.password) {
+      toast({
+        title: "Error",
+        description: "Email and password are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const result = await createAdminUser(
+        newAdminData.email,
+        newAdminData.password,
+        newAdminData.name || 'Admin User'
+      );
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: result.message,
+        });
+        setIsCreateAdminOpen(false);
+        setNewAdminData({ email: '', password: '', name: '' });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to create admin user",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -76,11 +133,70 @@ const AdminDashboard = () => {
   
   return (
     <div className="space-y-6 px-4 sm:px-0">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Monitor support activities and system performance
-        </p>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Monitor support activities and system performance
+          </p>
+        </div>
+        <Dialog open={isCreateAdminOpen} onOpenChange={setIsCreateAdminOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              Create Admin
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create New Admin</DialogTitle>
+              <DialogDescription>
+                Add a new admin user to the system. They will receive admin privileges immediately.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="admin-email">Email *</Label>
+                <Input
+                  id="admin-email"
+                  type="email"
+                  placeholder="admin@atherenergy.com"
+                  value={newAdminData.email}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="admin-password">Password *</Label>
+                <Input
+                  id="admin-password"
+                  type="password"
+                  placeholder="Enter secure password"
+                  value={newAdminData.password}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, password: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="admin-name">Name (Optional)</Label>
+                <Input
+                  id="admin-name"
+                  type="text"
+                  placeholder="Admin User"
+                  value={newAdminData.name}
+                  onChange={(e) => setNewAdminData(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                onClick={handleCreateAdmin}
+                disabled={isCreating}
+              >
+                {isCreating ? "Creating..." : "Create Admin"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">

@@ -2,25 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageCircle, Shield, Zap, Users } from "lucide-react";
-import { createAdminUser } from "@/utils/createAdminUser";
-import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const handleCreateAdmin = async () => {
-    const result = await createAdminUser();
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: result.message,
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to create admin user",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,14 +16,6 @@ const Index = () => {
               <span className="text-2xl font-bold">Ather Support</span>
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleCreateAdmin}
-                className="text-xs"
-              >
-                Create Admin
-              </Button>
               <Link to="/login">
                 <Button variant="outline">Customer Login</Button>
               </Link>

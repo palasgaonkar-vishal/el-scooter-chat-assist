@@ -1,23 +1,23 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export const createAdminUser = async () => {
+export const createAdminUser = async (email: string, password: string, name: string = 'Admin User') => {
   try {
     console.log('Creating admin user...');
     
     // Create admin user using signUp directly with proper configuration
     const { data, error } = await supabase.auth.signUp({
-      email: 'admin@atherenergy.com',
-      password: 'admin123',
+      email,
+      password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
-          name: 'Admin User'
+          name
         }
       }
     });
 
-    console.log('Admin credentials: admin@atherenergy.com / admin123');
+    console.log(`Admin credentials: ${email} / ${password}`);
 
     if (error) {
       if (error.message.includes('already registered') || error.message.includes('already been registered')) {
