@@ -21,10 +21,14 @@ const OrderStatusLookup = () => {
   // Get user profile to auto-load their orders
   const { data: profile } = useProfile();
 
+  console.log('Customer profile:', profile);
+
   // Auto-fetch orders for the logged-in user's mobile number
   const { data: userOrders, isLoading: loadingUserOrders } = useOrdersByMobile(
     profile?.mobile_number || ''
   );
+
+  console.log('User orders:', userOrders, 'Loading:', loadingUserOrders);
 
   // Manual search queries
   const { data: ordersByMobile, isLoading: loadingByMobile } = useOrdersByMobile(
