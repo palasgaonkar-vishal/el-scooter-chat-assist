@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Search, Package, Calendar, MapPin, CreditCard, Truck } from 'lucide-react';
 import { useOrdersByMobile, useOrderByNumber } from '@/hooks/useOrders';
+import { useProfile } from '@/hooks/useProfile';
 import type { Database } from '@/integrations/supabase/types';
 
 type Order = Database['public']['Tables']['orders']['Row'];
@@ -17,13 +18,30 @@ const OrderStatusLookup = () => {
   const [orderNumber, setOrderNumber] = useState('');
   const [searchValue, setSearchValue] = useState('');
 
+  // Get user profile to auto-load their orders
+  const { data: profile } = useProfile();
+
+  // Auto-fetch orders for the logged-in user's mobile number
+  const { data: userOrders, isLoading: loadingUserOrders } = useOrdersByMobile(
+    profile?.mobile_number || ''
+  );
+
+  // Manual search queries
   const { data: ordersByMobile, isLoading: loadingByMobile } = useOrdersByMobile(
-    searchType === 'mobile' ? searchValue : ''
+    searchType === 'mobile' && searchValue ? searchValue : ''
   );
   
   const { data: orderByNumber, isLoading: loadingByNumber } = useOrderByNumber(
-    searchType === 'order' ? searchValue : ''
+    searchType === 'order' && searchValue ? searchValue : ''
   );
+
+  // Auto-set the search value to user's mobile number when profile loads
+  useEffect(() => {
+    if (profile?.mobile_number && !searchValue) {
+      setSearchValue(profile.mobile_number);
+      setMobileNumber(profile.mobile_number);
+    }
+  }, [profile?.mobile_number, searchValue]);
 
   const handleSearch = () => {
     if (searchType === 'mobile') {
@@ -71,8 +89,14 @@ const OrderStatusLookup = () => {
     }).format(amount);
   };
 
-  const orders = searchType === 'mobile' ? ordersByMobile : (orderByNumber ? [orderByNumber] : []);
-  const isLoading = searchType === 'mobile' ? loadingByMobile : loadingByNumber;
+  // Determine which orders to show and loading state
+  const orders = searchValue ? 
+    (searchType === 'mobile' ? ordersByMobile : (orderByNumber ? [orderByNumber] : [])) :
+    userOrders;
+  
+  const isLoading = searchValue ?
+    (searchType === 'mobile' ? loadingByMobile : loadingByNumber) :
+    loadingUserOrders;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -131,48 +155,63 @@ const OrderStatusLookup = () => {
         </CardContent>
       </Card>
 
-      {/* Search Results */}
-      {searchValue && (
-        <div className="space-y-4">
-          {isLoading && (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
-                </div>
-                <p className="text-muted-foreground mt-4">Searching for orders...</p>
-              </CardContent>
-            </Card>
-          )}
+      {/* Auto-loaded user orders or search results */}
+      <div className="space-y-4">
+        {!profile?.mobile_number && !searchValue && (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Complete Your Profile</h3>
+              <p className="text-muted-foreground">
+                Please update your profile with your mobile number to view your orders.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-          {!isLoading && orders && orders.length === 0 && (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Orders Found</h3>
-                <p className="text-muted-foreground">
-                  {searchType === 'mobile' 
-                    ? 'No orders found for this mobile number.' 
-                    : 'No order found with this order number.'}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+        {isLoading && (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+              </div>
+              <p className="text-muted-foreground mt-4">Loading your orders...</p>
+            </CardContent>
+          </Card>
+        )}
 
-          {!isLoading && orders && orders.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">
-                {orders.length > 1 ? `${orders.length} Orders Found` : 'Order Details'}
-              </h2>
-              
-              {orders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        {!isLoading && orders && orders.length === 0 && (profile?.mobile_number || searchValue) && (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No Orders Found</h3>
+              <p className="text-muted-foreground">
+                {searchValue && searchType === 'mobile' 
+                  ? 'No orders found for this mobile number.' 
+                  : searchValue && searchType === 'order'
+                  ? 'No order found with this order number.'
+                  : 'You don\'t have any orders yet.'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!isLoading && orders && orders.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">
+              {searchValue 
+                ? (orders.length > 1 ? `${orders.length} Orders Found` : 'Order Details')
+                : (orders.length > 1 ? `Your Orders (${orders.length})` : 'Your Order')
+              }
+            </h2>
+            
+            {orders.map((order) => (
+              <OrderCard key={order.id} order={order} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
