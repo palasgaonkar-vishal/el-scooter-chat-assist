@@ -70,12 +70,17 @@ export const useFAQManagement = () => {
           .update({ ...updates, updated_at: new Date().toISOString() })
           .eq('id', id)
           .select()
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error updating FAQ:', error);
           throw error;
         }
+        
+        if (!data) {
+          throw new Error('FAQ not found or update failed');
+        }
+        
         return data;
       },
       onSuccess: () => {

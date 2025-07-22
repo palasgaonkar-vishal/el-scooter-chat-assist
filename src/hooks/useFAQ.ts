@@ -182,6 +182,10 @@ export const useRateFAQ = () => {
         throw fetchError;
       }
 
+      if (!currentFAQ) {
+        throw new Error('FAQ not found');
+      }
+
       // Update counts
       const updateData = isHelpful
         ? { helpful_count: (currentFAQ.helpful_count || 0) + 1 }
