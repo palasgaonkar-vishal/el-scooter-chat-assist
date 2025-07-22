@@ -40,7 +40,7 @@ export const useOrdersByMobile = (mobileNumber: string) => {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .or(`customer_mobile.eq.${mobileNumber},customer_mobile.eq.${normalizedNumber},customer_mobile.eq.${withPrefix}`)
+        .in('customer_mobile', [mobileNumber, normalizedNumber, withPrefix])
         .order('created_at', { ascending: false });
 
       if (error) {
