@@ -266,8 +266,11 @@ export const validateCSVData = (data: any[]): { valid: CSVOrderData[]; invalid: 
       }
     }
 
-    if (row.amount && (isNaN(parseFloat(row.amount)) || parseFloat(row.amount) < 0)) {
-      errors.push('Amount must be a positive number');
+    if (row.amount !== undefined && row.amount !== null && row.amount !== '') {
+      const amountValue = parseFloat(row.amount);
+      if (isNaN(amountValue) || amountValue <= 0) {
+        errors.push('Amount must be a positive number');
+      }
     }
 
     if (errors.length > 0) {
