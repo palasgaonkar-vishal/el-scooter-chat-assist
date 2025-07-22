@@ -61,13 +61,18 @@ export const ScooterModelSelector: React.FC<ScooterModelSelectorProps> = ({
                 ? 'ring-2 ring-primary bg-primary/5'
                 : 'hover:bg-muted/50'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            onClick={() => handleModelToggle(model.id)}
+            onClick={(e) => {
+              // Prevent double firing when clicking the checkbox
+              if (e.target === e.currentTarget) {
+                handleModelToggle(model.id);
+              }
+            }}
           >
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <Checkbox
                   checked={selectedModels.includes(model.id)}
-                  onChange={() => handleModelToggle(model.id)}
+                  onCheckedChange={() => handleModelToggle(model.id)}
                   disabled={disabled}
                 />
                 <div className="flex-1">
